@@ -7,17 +7,13 @@ import Product from "./Products/Product";
 
 const Home = () => {
   const { keyword } = useParams();
-  const { data, isLoading, isError } = useGetProductsQuery({ keyword });
+  const { data, isLoading, isError, error } = useGetProductsQuery({ keyword });
 
   return (
     <>
       {!keyword ? <Header /> : null}
       {isLoading ? (
         <Loader />
-      ) : isError ? (
-        <Message variant="danger">
-          {isError?.data.message || isError.error}
-        </Message>
       ) : (
         <>
           <div className="flex justify-between items-center">
@@ -35,11 +31,17 @@ const Home = () => {
 
           <div>
             <div className="flex justify-center flex-wrap mt-[2rem]">
-              {data.products.map((product) => (
-                <div key={product._id}>
-                  <Product product={product} />
-                </div>
-              ))}
+              {isError ? (
+                <Message variant="error">
+                  {error?.data?.message || error?.error || "Something went wrong"}
+                </Message>
+              ) : (
+                data.products.map((product) => (
+                  <div key={product._id}>
+                    <Product product={product} />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </>

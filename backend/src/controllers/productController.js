@@ -81,11 +81,11 @@ const fetchProducts = asyncHandler(async (req, res) => {
 
     const keyword = req.query.keyword
       ? {
-          name: {
-            $regex: req.query.keyword,
-            $options: "i",
-          },
-        }
+        name: {
+          $regex: req.query.keyword,
+          $options: "i",
+        },
+      }
       : {};
 
     const count = await Product.countDocuments({ ...keyword });
@@ -175,6 +175,8 @@ const addProductReview = asyncHandler(async (req, res) => {
 });
 
 const fetchTopProducts = asyncHandler(async (req, res) => {
+  console.log("Fecching Top Products: ", req.body);
+
   try {
     const products = await Product.find({}).sort({ rating: -1 }).limit(4);
     res.json(products);

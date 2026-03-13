@@ -1,0 +1,12 @@
+name: gomor-ecommerce
+services:
+  mongo:
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: gomor-ecommerce
+    volumes:
+      - ./compose-files/mongo:/docker-entrypoint-initdb.d
