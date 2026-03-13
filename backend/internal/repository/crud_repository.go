@@ -51,11 +51,11 @@ type SortBy struct {
 }
 
 type ManyOpts struct {
-	Select []string
-	Expand []string
-	SortBy []SortBy
-	Limit  uint32
-	Offset uint32
+	Select *[]string
+	Expand *[]string
+	SortBy *[]SortBy
+	Limit  *int64
+	Offset *int64
 }
 
 type Page[T any] struct {
@@ -67,8 +67,8 @@ type Page[T any] struct {
 }
 
 type OneOpts struct {
-	Select []string
-	Expand []string
+	Select *[]string
+	Expand *[]string
 }
 
 func GetEntityID[T any, ID comparable](entity *T) (*ID, error) {

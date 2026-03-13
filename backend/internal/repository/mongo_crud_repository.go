@@ -77,9 +77,11 @@ func (r *mongoCRUDRepository[T, ID]) FindById(ctx context.Context, id ID, opts .
 	var entity T
 	findOpts := options.FindOne()
 	if len(opts) > 0 {
-		if len(opts[0].Select) > 0 {
+		opt := opts[0]
+		selectFields := opt.Select
+		if selectFields != nil && len(*selectFields) > 0 {
 			projection := bson.M{}
-			for _, f := range opts[0].Select {
+			for _, f := range *selectFields {
 				projection[f] = 1
 			}
 			findOpts.SetProjection(projection)
@@ -105,16 +107,19 @@ func (r *mongoCRUDRepository[T, ID]) FindOne(ctx context.Context, filter any, op
 	var entity T
 	findOpts := options.FindOne()
 	if len(opts) > 0 {
-		if len(opts[0].Select) > 0 {
+		opt := opts[0]
+		selectFields := opt.Select
+		if selectFields != nil && len(*selectFields) > 0 {
 			projection := bson.M{}
-			for _, f := range opts[0].Select {
+			for _, f := range *selectFields {
 				projection[f] = 1
 			}
 			findOpts.SetProjection(projection)
 		}
-		if len(opts[0].SortBy) > 0 {
+		sortFields := opt.SortBy
+		if sortFields != nil && len(*sortFields) > 0 {
 			sort := bson.D{}
-			for _, s := range opts[0].SortBy {
+			for _, s := range *sortFields {
 				dir := 1
 				if s.Direction == SortDirection_Descending {
 					dir = -1
@@ -135,16 +140,18 @@ func (r *mongoCRUDRepository[T, ID]) FindMany(ctx context.Context, filter any, o
 	findOpts := options.Find()
 	if len(opts) > 0 {
 		o := opts[0]
-		if len(o.Select) > 0 {
+		selectFields := o.Select
+		if selectFields != nil && len(*selectFields) > 0 {
 			projection := bson.M{}
-			for _, f := range o.Select {
+			for _, f := range *selectFields {
 				projection[f] = 1
 			}
 			findOpts.SetProjection(projection)
 		}
-		if len(o.SortBy) > 0 {
+		sortFields := o.SortBy
+		if sortFields != nil && len(*sortFields) > 0 {
 			sort := bson.D{}
-			for _, s := range o.SortBy {
+			for _, s := range *sortFields {
 				dir := 1
 				if s.Direction == SortDirection_Descending {
 					dir = -1
@@ -153,13 +160,13 @@ func (r *mongoCRUDRepository[T, ID]) FindMany(ctx context.Context, filter any, o
 			}
 			findOpts.SetSort(sort)
 		}
-		if o.Limit > 0 {
-			l := int64(o.Limit)
-			findOpts.SetLimit(l)
+		limit := o.Limit
+		if limit != nil && *limit > 0 {
+			findOpts.SetLimit(*limit)
 		}
-		if o.Offset > 0 {
-			skip := int64(o.Offset)
-			findOpts.SetSkip(skip)
+		offset := o.Offset
+		if offset != nil && *offset > 0 {
+			findOpts.SetSkip(*offset)
 		}
 	}
 
@@ -190,9 +197,10 @@ func (r *mongoCRUDRepository[T, ID]) FindPage(ctx context.Context, filter any, o
 	var page, size int32
 	if len(opts) > 0 {
 		o := opts[0]
-		if o.Limit > 0 {
-			size = int32(o.Limit)
-			page = int32(o.Offset)/size + 1
+		limit := o.Limit
+		if limit != nil && *limit > 0 {
+			size = int32(*limit)
+			page = int32(*o.Offset)/size + 1
 		}
 	}
 
