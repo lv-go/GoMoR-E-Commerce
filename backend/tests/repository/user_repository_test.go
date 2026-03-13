@@ -1,0 +1,72 @@
+package repository
+
+import (
+	"testing"
+	"time"
+
+	"gomor-e-commerce/internal/models"
+	"gomor-e-commerce/internal/repository"
+
+	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+func TestUserRepository(t *testing.T) {
+	var err error
+
+	// Create repository
+	repo := repository.NewMongoCRUDRepository[models.User, primitive.ObjectID](DB, "users")
+
+	// Test data
+	user := &models.User{
+		Username:  "testuser",
+		Email:     "test@example.com",
+		Password:  "hashedpassword",
+		IsAdmin:   false,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	// Test Create
+	t.Run("Create", func(t *testing.T) {
+		err = repo.Create(t.Context(), user)
+		assert.NoError(t, err)
+		assert.NotNil(t, user.ID)
+	})
+
+	// Test FindById
+	var foundUser *models.User
+	t.Run("FindById", func(t *testing.T) {
+		foundUser, err = repo.FindById(t.Context(), user.ID)
+		assert.NoError(t, err)
+		assert.Equal(t, user.Username, foundUser.Username)
+		assert.Equal(t, user.Email, foundUser.Email)
+	})
+
+	// Test Update
+	foundUser.Username = "updateduser"
+	t.Run("Update", func(t *testing.T) {
+		err = repo.Update(t.Context(), foundUser)
+		assert.NoError(t, err)
+	})
+
+	// Test FindById after update
+	t.Run("FindByIdAfterUpdate", func(t *testing.T) {
+		foundUser, err = repo.FindById(t.Context(), user.ID)
+		assert.NoError(t, err)
+		assert.Equal(t, "updateduser", foundUser.Username)
+	})
+
+	// Test Delete
+	t.Run("Delete", func(t *testing.T) {
+		err = repo.Delete(t.Context(), user.ID)
+		assert.NoError(t, err)
+	})
+
+	// Test FindById after delete
+	t.Run("FindByIdAfterDelete", func(t *testing.T) {
+		foundUser, err = repo.FindById(t.Context(), user.ID)
+		assert.Error(t, err)
+		assert.Nil(t, foundUser)
+	})
+}
