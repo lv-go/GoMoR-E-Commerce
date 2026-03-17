@@ -1,0 +1,57 @@
+{
+    "kind": "identitytoolkit#DownloadAccountResponse",
+    "users": [
+        {
+            "localId": "RnbVkY3fLE4cWUQccHN8j06KSxx1",
+            "lastLoginAt": "1769461109986",
+            "displayName": "Admin One",
+            "photoUrl": "",
+            "emailVerified": false,
+            "email": "admin1@test.com",
+            "salt": "fakeSaltCnoTz0jZc7pARWbuKXhz",
+            "passwordHash": "fakeHash:salt=fakeSaltCnoTz0jZc7pARWbuKXhz:password=S3cr3tP@ssw0rd",
+            "passwordUpdatedAt": 1769460273338,
+            "validSince": "1769460273",
+            "mfaInfo": [],
+            "createdAt": "1769460273338",
+            "providerUserInfo": [
+                {
+                    "providerId": "password",
+                    "email": "admin1@test.com",
+                    "federatedId": "admin1@test.com",
+                    "rawId": "admin1@test.com",
+                    "displayName": "Admin One",
+                    "photoUrl": ""
+                }
+            ],
+            "customAttributes": "{\"role\": \"admin\"}",
+            "lastRefreshAt": "2026-01-26T20:58:29.986Z"
+        },
+        {
+            "localId": "RnbVkY3fLE4cWUQccHN8j06KSxx2",
+            "lastLoginAt": "1769461109986",
+            "displayName": "User One",
+            "photoUrl": "",
+            "emailVerified": false,
+            "email": "user1@test.com",
+            "salt": "fakeSaltCnoTz0jZc7pARWbuKXhz",
+            "passwordHash": "fakeHash:salt=fakeSaltCnoTz0jZc7pARWbuKXhz:password=S3cr3tP@ssw0rd",
+            "passwordUpdatedAt": 1769460273338,
+            "validSince": "1769460273",
+            "mfaInfo": [],
+            "createdAt": "1769460273338",
+            "providerUserInfo": [
+                {
+                    "providerId": "password",
+                    "email": "user1@test.com",
+                    "federatedId": "user1@test.com",
+                    "rawId": "user1@test.com",
+                    "displayName": "User One",
+                    "photoUrl": ""
+                }
+            ],
+            "customAttributes": "{\"role\": \"user\"}",
+            "lastRefreshAt": "2026-01-26T20:58:29.986Z"
+        }
+    ]
+}

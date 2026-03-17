@@ -8,21 +8,22 @@ import (
 	"gomor-e-commerce/internal/repository"
 
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"syreclabs.com/go/faker"
 )
 
 func TestUserRepository(t *testing.T) {
 	var err error
 
 	// Create repository
-	repo := repository.NewMongoCRUDRepository[models.User, primitive.ObjectID](DB, "users")
+	repo := repository.NewMongoCRUDRepository[models.User, string](DB, "users")
 
 	// Test data
 	user := &models.User{
-		Username:  "testuser",
-		Email:     "test@example.com",
-		Password:  "hashedpassword",
-		IsAdmin:   false,
+		ID:        "user-" + faker.RandomString(10),
+		Username:  faker.Name().FirstName() + faker.Name().LastName(),
+		Email:     faker.Internet().Email(),
+		IsActive:  false,
+		Role:      "user",
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

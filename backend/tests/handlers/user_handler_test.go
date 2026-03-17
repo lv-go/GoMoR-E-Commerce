@@ -11,22 +11,24 @@ import (
 	"gomor-e-commerce/internal/models"
 	"gomor-e-commerce/internal/repository"
 
+	"syreclabs.com/go/faker"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestUserHandler(t *testing.T) {
 	// Create repository
-	repo := repository.NewMongoCRUDRepository[models.User, primitive.ObjectID](DB, "users")
+	repo := repository.NewMongoCRUDRepository[models.User, string](DB, "users")
 
 	// Create handler
 	mux := http.NewServeMux()
 	handlers.NewCRUDHandler(mux, repo, "/users")
 
 	user := &models.User{
-		Username: "testuser",
-		Email:    "test@example.com",
-		Password: "password123",
+		ID:       "user-" + faker.RandomString(10),
+		Username: faker.Name().FirstName() + faker.Name().LastName(),
+		Email:    faker.Internet().Email(),
+		IsActive: false,
+		Role:     "user",
 	}
 
 	t.Run("Create", func(t *testing.T) {
@@ -47,7 +49,7 @@ func TestUserHandler(t *testing.T) {
 
 	t.Run("FindById", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/users/"+user.ID.Hex(), nil))
+		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/users/"+user.ID, nil))
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var foundUser models.User
@@ -62,7 +64,7 @@ func TestUserHandler(t *testing.T) {
 		user.Username = "testuser_updated"
 		jsonBody, err := json.Marshal(user)
 		assert.NoError(t, err)
-		mux.ServeHTTP(rr, httptest.NewRequest("PUT", "/users/"+user.ID.Hex(), bytes.NewBuffer(jsonBody)))
+		mux.ServeHTTP(rr, httptest.NewRequest("PUT", "/users/"+user.ID, bytes.NewBuffer(jsonBody)))
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var updatedUser models.User
@@ -74,13 +76,13 @@ func TestUserHandler(t *testing.T) {
 
 	t.Run("Delete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("DELETE", "/users/"+user.ID.Hex(), nil))
+		mux.ServeHTTP(rr, httptest.NewRequest("DELETE", "/users/"+user.ID, nil))
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
 	t.Run("FindByIdAfterDelete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/users/"+user.ID.Hex(), nil))
+		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/users/"+user.ID, nil))
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 }
