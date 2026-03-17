@@ -3,6 +3,7 @@ module gomor-e-commerce
 go 1.26.1
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/stretchr/testify v1.11.1
 	go.mongodb.org/mongo-driver v1.17.9
 )
