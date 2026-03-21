@@ -69,6 +69,21 @@ func TestCategoryHandler(t *testing.T) {
 		assert.Equal(t, category.ID, updatedCategory.ID)
 	})
 
+	t.Run("FindPage", func(t *testing.T) {
+		rr := httptest.NewRecorder()
+		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/categories?limit=10&offset=0", nil))
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		var page repository.Page[models.Category]
+		err := json.NewDecoder(rr.Body).Decode(&page)
+		assert.NoError(t, err)
+		assert.LessOrEqual(t, int64(1), page.Total)
+		assert.LessOrEqual(t, int32(1), page.Size)
+		assert.LessOrEqual(t, int32(1), page.TotalPages)
+		assert.LessOrEqual(t, 1, len(page.Items))
+		assert.Contains(t, page.Items, *category)
+	})
+
 	t.Run("Delete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
 		mux.ServeHTTP(rr, httptest.NewRequest("DELETE", "/categories/"+category.ID.Hex(), nil))

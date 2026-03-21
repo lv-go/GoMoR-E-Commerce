@@ -74,6 +74,21 @@ func TestOrderHandler(t *testing.T) {
 		assert.Equal(t, order.ID, updatedOrder.ID)
 	})
 
+	t.Run("FindPage", func(t *testing.T) {
+		rr := httptest.NewRecorder()
+		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/orders?limit=10&offset=0", nil))
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		var page repository.Page[models.Order]
+		err := json.NewDecoder(rr.Body).Decode(&page)
+		assert.NoError(t, err)
+		assert.LessOrEqual(t, int64(1), page.Total)
+		assert.LessOrEqual(t, int32(1), page.Size)
+		assert.LessOrEqual(t, int32(1), page.TotalPages)
+		assert.LessOrEqual(t, 1, len(page.Items))
+		assert.Contains(t, page.Items, *order)
+	})
+
 	t.Run("Delete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
 		mux.ServeHTTP(rr, httptest.NewRequest("DELETE", "/orders/"+order.ID.Hex(), nil))

@@ -59,11 +59,11 @@ type ManyOpts struct {
 }
 
 type Page[T any] struct {
-	Items      []T
-	Total      int64
-	Page       int32
-	Size       int32
-	TotalPages int32
+	Items      []T   `json:"items"`
+	Total      int64 `json:"total"`
+	Page       int32 `json:"page"`
+	Size       int32 `json:"size"`
+	TotalPages int32 `json:"totalPages"`
 }
 
 type OneOpts struct {

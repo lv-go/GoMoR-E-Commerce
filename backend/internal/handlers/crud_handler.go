@@ -28,7 +28,7 @@ func SetupCRUDHandler[T any, ID comparable](
 	mux.HandleFunc(http.MethodGet+" "+path+"/{id}", h.FindById)
 	mux.HandleFunc(http.MethodPut+" "+path+"/{id}", h.Update)
 	mux.HandleFunc(http.MethodDelete+" "+path+"/{id}", h.Delete)
-	mux.HandleFunc(http.MethodGet+" "+path+"/", h.FindPage)
+	mux.HandleFunc(http.MethodGet+" "+path, h.FindPage)
 }
 
 func (h *CRUDHandler[T, ID]) parseID(r *http.Request) (*ID, error) {
@@ -143,13 +143,8 @@ func (h *CRUDHandler[T, ID]) FindPage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	limit, err = strconv.Atoi(r.URL.Query().Get("limit"))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
 
-	result, err := h.repo.FindPage(r.Context(), nil, repository.ManyOpts{
+	result, err := h.repo.FindPage(r.Context(), map[string]any{}, repository.ManyOpts{
 		Limit:  new(int64(limit)),
 		Offset: new(int64(offset)),
 	})
