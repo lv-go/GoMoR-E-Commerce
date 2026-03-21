@@ -9,7 +9,7 @@ import (
 
 type userKey string
 
-const userCtx userKey = "User"
+const userCtx userKey = "USER"
 
 func GetUserFromContext(r *http.Request) *models.User {
 	user, _ := r.Context().Value(userCtx).(*models.User)

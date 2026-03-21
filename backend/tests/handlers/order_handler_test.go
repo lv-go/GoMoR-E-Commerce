@@ -21,7 +21,7 @@ func TestOrderHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handlers.NewCRUDHandler(mux, repo, "/orders")
+	handlers.SetupCRUDHandler(mux, repo, "/orders")
 
 	order := &models.Order{
 		PaymentMethod: "PayPal",

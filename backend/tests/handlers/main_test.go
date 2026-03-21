@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"gomor-e-commerce/internal/config"
+	"gomor-e-commerce/internal/app"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	DB = config.ConnectDB(ctx)
+	DB = app.ConnectDB(ctx)
 	if DB == nil {
 		log.Fatal("Failed to connect to database in TestMain")
 	}

@@ -16,7 +16,7 @@ type CRUDHandler[T any, ID comparable] struct {
 	repo repository.CRUDRepository[T, ID]
 }
 
-func NewCRUDHandler[T any, ID comparable](
+func SetupCRUDHandler[T any, ID comparable](
 	mux *http.ServeMux,
 	repo repository.CRUDRepository[T, ID],
 	path string,

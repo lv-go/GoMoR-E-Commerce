@@ -21,7 +21,7 @@ func TestProductHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handlers.NewCRUDHandler(mux, repo, "/products")
+	handlers.SetupCRUDHandler(mux, repo, "/products")
 
 	product := &models.Product{
 		Name:         "Test Product",

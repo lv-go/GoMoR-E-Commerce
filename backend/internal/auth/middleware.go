@@ -9,34 +9,19 @@ import (
 	"gomor-e-commerce/internal/utils"
 )
 
-type Config struct {
-	Auth struct {
-		Basic struct {
-			User string
-			Pass string
-		}
-	}
-	RateLimiter struct {
-		Enabled bool
-	}
-}
-
-type Middlewares struct {
-	config     Config
+type AuthMiddleware struct {
 	authClient Client
 }
 
-func NewMiddlewares(
+func NewAuthMiddleware(
 	authClient Client,
-	config Config,
-) Middlewares {
-	return Middlewares{
+) AuthMiddleware {
+	return AuthMiddleware{
 		authClient: authClient,
-		config:     config,
 	}
 }
 
-func (m *Middlewares) AuthTokenMiddleware(next http.Handler) http.Handler {
+func (m *AuthMiddleware) AuthTokenMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {

@@ -11,8 +11,8 @@ import (
 	"gomor-e-commerce/internal/models"
 	"gomor-e-commerce/internal/repository"
 
-	"syreclabs.com/go/faker"
 	"github.com/stretchr/testify/assert"
+	"syreclabs.com/go/faker"
 )
 
 func TestUserHandler(t *testing.T) {
@@ -21,7 +21,7 @@ func TestUserHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handlers.NewCRUDHandler(mux, repo, "/users")
+	handlers.SetupCRUDHandler(mux, repo, "/users")
 
 	user := &models.User{
 		ID:       "user-" + faker.RandomString(10),
