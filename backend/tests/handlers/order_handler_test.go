@@ -21,7 +21,12 @@ func TestOrderHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handlers.SetupCRUDHandler(mux, repo, "/orders")
+	handler := handlers.NewCRUDHandler(repo)
+	mux.HandleFunc("POST /orders", handler.Create)
+	mux.HandleFunc("GET /orders/{id}", handler.FindById)
+	mux.HandleFunc("PUT /orders/{id}", handler.Update)
+	mux.HandleFunc("DELETE /orders/{id}", handler.Delete)
+	mux.HandleFunc("GET /orders", handler.FindPage)
 
 	order := &models.Order{
 		PaymentMethod: "PayPal",

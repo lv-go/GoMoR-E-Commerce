@@ -16,19 +16,10 @@ type CRUDHandler[T any, ID comparable] struct {
 	repo repository.CRUDRepository[T, ID]
 }
 
-func SetupCRUDHandler[T any, ID comparable](
-	mux *http.ServeMux,
-	repo repository.CRUDRepository[T, ID],
-	path string,
-) {
-	h := &CRUDHandler[T, ID]{
+func NewCRUDHandler[T any, ID comparable](repo repository.CRUDRepository[T, ID]) *CRUDHandler[T, ID] {
+	return &CRUDHandler[T, ID]{
 		repo: repo,
 	}
-	mux.HandleFunc(http.MethodPost+" "+path, h.Create)
-	mux.HandleFunc(http.MethodGet+" "+path+"/{id}", h.FindById)
-	mux.HandleFunc(http.MethodPut+" "+path+"/{id}", h.Update)
-	mux.HandleFunc(http.MethodDelete+" "+path+"/{id}", h.Delete)
-	mux.HandleFunc(http.MethodGet+" "+path, h.FindPage)
 }
 
 func (h *CRUDHandler[T, ID]) parseID(r *http.Request) (*ID, error) {

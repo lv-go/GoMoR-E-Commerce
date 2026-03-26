@@ -7,10 +7,16 @@ import (
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"gomor-e-commerce/internal/app"
 )
 
 func main() {
+	// Load environment variables
+	if err := godotenv.Load(); err != nil {
+		slog.Warn("No .env file found, using system environment variables")
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

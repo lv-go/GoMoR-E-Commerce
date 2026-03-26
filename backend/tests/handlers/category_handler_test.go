@@ -21,7 +21,12 @@ func TestCategoryHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handlers.SetupCRUDHandler(mux, repo, "/categories")
+	handler := handlers.NewCRUDHandler(repo)
+	mux.HandleFunc("POST /categories", handler.Create)
+	mux.HandleFunc("GET /categories/{id}", handler.FindById)
+	mux.HandleFunc("PUT /categories/{id}", handler.Update)
+	mux.HandleFunc("DELETE /categories/{id}", handler.Delete)
+	mux.HandleFunc("GET /categories", handler.FindPage)
 
 	category := &models.Category{
 		Name: "Electronics",

@@ -21,8 +21,8 @@ func NewAuthMiddleware(
 	}
 }
 
-func (m *AuthMiddleware) AuthTokenMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func (m *AuthMiddleware) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			utils.UnauthorizedErrorResponse(w, r, fmt.Errorf("authorization header is missing"))
@@ -42,14 +42,44 @@ func (m *AuthMiddleware) AuthTokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// The UID from the token is not a standard UUID. We generate a deterministic UUIDv5 from it.
+		// Helper function to safely get string claims
+		getStrClaim := func(claims map[string]interface{}, key string) string {
+			if val, ok := claims[key]; ok {
+				if s, ok := val.(string); ok {
+					return s
+				}
+			}
+			return ""
+		}
+
+		// Helper function to safely get bool claims
+		getBoolClaim := func(claims map[string]interface{}, key string) bool {
+			if val, ok := claims[key]; ok {
+				if b, ok := val.(bool); ok {
+					return b
+				}
+			}
+			return false
+		}
+
 		r = SetUserInContext(r, &models.User{
 			ID:       jwtToken.UID,
-			Email:    jwtToken.Claims["email"].(string),
-			Username: jwtToken.Claims["username"].(string),
-			Role:     jwtToken.Claims["role"].(string),
-			IsActive: jwtToken.Claims["email_verified"].(bool),
+			Email:    getStrClaim(jwtToken.Claims, "email"),
+			Name:     getStrClaim(jwtToken.Claims, "name"),
+			Role:     getStrClaim(jwtToken.Claims, "role"),
+			IsActive: getBoolClaim(jwtToken.Claims, "email_verified"),
 		})
-		next.ServeHTTP(w, r)
+		next(w, r)
+	}
+}
+
+func (m *AuthMiddleware) IsAdmin(next http.HandlerFunc) http.HandlerFunc {
+	return m.IsAuthenticated(func(w http.ResponseWriter, r *http.Request) {
+		user := GetUserFromContext(r)
+		if user.Role != "admin" {
+			utils.UnauthorizedErrorResponse(w, r, fmt.Errorf("user is not admin"))
+			return
+		}
+		next(w, r)
 	})
 }

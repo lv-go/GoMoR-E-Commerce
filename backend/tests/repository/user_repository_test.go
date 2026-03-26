@@ -20,7 +20,7 @@ func TestUserRepository(t *testing.T) {
 	// Test data
 	user := &models.User{
 		ID:        "user-" + faker.RandomString(10),
-		Username:  faker.Name().FirstName() + faker.Name().LastName(),
+		Name:      faker.Name().FirstName() + faker.Name().LastName(),
 		Email:     faker.Internet().Email(),
 		IsActive:  false,
 		Role:      "user",
@@ -40,12 +40,12 @@ func TestUserRepository(t *testing.T) {
 	t.Run("FindById", func(t *testing.T) {
 		foundUser, err = repo.FindById(t.Context(), user.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, user.Username, foundUser.Username)
+		assert.Equal(t, user.Name, foundUser.Name)
 		assert.Equal(t, user.Email, foundUser.Email)
 	})
 
 	// Test Update
-	foundUser.Username = "updateduser"
+	foundUser.Name = "updateduser"
 	t.Run("Update", func(t *testing.T) {
 		err = repo.Update(t.Context(), foundUser)
 		assert.NoError(t, err)
@@ -55,7 +55,7 @@ func TestUserRepository(t *testing.T) {
 	t.Run("FindByIdAfterUpdate", func(t *testing.T) {
 		foundUser, err = repo.FindById(t.Context(), user.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, "updateduser", foundUser.Username)
+		assert.Equal(t, "updateduser", foundUser.Name)
 	})
 
 	// Test Delete

@@ -53,7 +53,7 @@ func Setup(ctx context.Context) Client {
 		slog.Info("Firebase Auth Emulator Detected: Connecting to:", "emulatorHost", emulatorHost)
 		// Use the project ID the emulator is configured with.
 		// This should match the 'aud' claim in the JWT token.
-		config := &firebase.Config{ProjectID: "demo-no-project"}
+		config := &firebase.Config{ProjectID: "gomor-e-commerce"}
 		app, err := firebase.NewApp(ctx, config)
 		if err != nil {
 			log.Fatalf("error initializing app for emulator: %v\n", err)

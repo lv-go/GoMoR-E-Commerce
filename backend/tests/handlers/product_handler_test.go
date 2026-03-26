@@ -21,7 +21,12 @@ func TestProductHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handlers.SetupCRUDHandler(mux, repo, "/products")
+	handler := handlers.NewCRUDHandler(repo)
+	mux.HandleFunc("POST /products", handler.Create)
+	mux.HandleFunc("GET /products/{id}", handler.FindById)
+	mux.HandleFunc("PUT /products/{id}", handler.Update)
+	mux.HandleFunc("DELETE /products/{id}", handler.Delete)
+	mux.HandleFunc("GET /products", handler.FindPage)
 
 	product := &models.Product{
 		Name:         "Test Product",

@@ -12,7 +12,7 @@ import (
 
 func ConnectDB(ctx context.Context) *mongo.Database {
 	slog.Info("Connecting to MongoDB...")
-	uri := os.Getenv("MONGODB_URI")
+	uri := os.Getenv("MONGO_URI")
 	if uri == "" {
 		uri = "mongodb://root:password@localhost:27017"
 	}

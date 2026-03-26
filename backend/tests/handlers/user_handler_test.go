@@ -21,11 +21,16 @@ func TestUserHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handlers.SetupCRUDHandler(mux, repo, "/users")
+	handler := handlers.NewCRUDHandler(repo)
+	mux.HandleFunc("POST /users", handler.Create)
+	mux.HandleFunc("GET /users/{id}", handler.FindById)
+	mux.HandleFunc("PUT /users/{id}", handler.Update)
+	mux.HandleFunc("DELETE /users/{id}", handler.Delete)
+	mux.HandleFunc("GET /users", handler.FindPage)
 
 	user := &models.User{
 		ID:       "user-" + faker.RandomString(10),
-		Username: faker.Name().FirstName() + faker.Name().LastName(),
+		Name:     faker.Name().FirstName() + faker.Name().LastName(),
 		Email:    faker.Internet().Email(),
 		IsActive: false,
 		Role:     "user",
@@ -41,7 +46,7 @@ func TestUserHandler(t *testing.T) {
 		var createdUser models.User
 		err = json.NewDecoder(rr.Body).Decode(&createdUser)
 		assert.NoError(t, err)
-		assert.Equal(t, user.Username, createdUser.Username)
+		assert.Equal(t, user.Name, createdUser.Name)
 		assert.Equal(t, user.Email, createdUser.Email)
 		assert.NotNil(t, createdUser.ID)
 		user.ID = createdUser.ID
@@ -55,13 +60,13 @@ func TestUserHandler(t *testing.T) {
 		var foundUser models.User
 		err := json.NewDecoder(rr.Body).Decode(&foundUser)
 		assert.NoError(t, err)
-		assert.Equal(t, user.Username, foundUser.Username)
+		assert.Equal(t, user.Name, foundUser.Name)
 		assert.Equal(t, user.ID, foundUser.ID)
 	})
 
 	t.Run("Update", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		user.Username = "testuser_updated"
+		user.Name = "testuser_updated"
 		jsonBody, err := json.Marshal(user)
 		assert.NoError(t, err)
 		mux.ServeHTTP(rr, httptest.NewRequest("PUT", "/users/"+user.ID, bytes.NewBuffer(jsonBody)))
@@ -70,7 +75,7 @@ func TestUserHandler(t *testing.T) {
 		var updatedUser models.User
 		err = json.NewDecoder(rr.Body).Decode(&updatedUser)
 		assert.NoError(t, err)
-		assert.Equal(t, user.Username, updatedUser.Username)
+		assert.Equal(t, user.Name, updatedUser.Name)
 		assert.Equal(t, user.ID, updatedUser.ID)
 	})
 
