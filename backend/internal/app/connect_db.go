@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -14,9 +15,14 @@ func ConnectDB(ctx context.Context) *mongo.Database {
 	slog.Info("Connecting to MongoDB...")
 	uri := os.Getenv("MONGO_URI")
 	if uri == "" {
-		uri = "mongodb://root:password@localhost:27017"
+		uri = "localhost:27017"
 	}
 	slog.Info("MongoDB URI: ", "uri", uri)
+	password := os.Getenv("MONGO_PASSWORD")
+	username := os.Getenv("MONGO_USERNAME")
+	if password != "" && username != "" {
+		uri = fmt.Sprintf("mongodb://%s:%s@%s", username, password, uri)
+	}
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal("Failed to connect to MongoDB:", err)
