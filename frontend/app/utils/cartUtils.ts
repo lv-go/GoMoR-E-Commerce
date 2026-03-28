@@ -1,11 +1,11 @@
-export const addDecimals = (num) => {
+export const addDecimals = (num: number) => {
   return (Math.round(num * 100) / 100).toFixed(2);
 };
 
-export const updateCart = (state) => {
+export const updateCart = (state: any) => {
   // Calculate the items price
   state.itemsPrice = addDecimals(
-    state.cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
+    state.cartItems.reduce((acc: any, item: any) => acc + item.price * item.qty, 0)
   );
 
   // Calculate the shipping price
