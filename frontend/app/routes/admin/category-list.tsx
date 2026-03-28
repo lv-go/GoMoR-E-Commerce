@@ -9,9 +9,9 @@ import {
 import { toast } from "react-toastify";
 import CategoryForm from "../../components/CategoryForm";
 import Modal from "../../components/Modal";
-import AdminMenu from "./AdminMenu";
+import AdminMenu from "../../components/Admin/AdminMenu";
 
-const CategoryList = () => {
+export default function CategoryList() {
   const { data: categories } = useFetchCategoriesQuery();
   const [name, setName] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -134,6 +134,4 @@ const CategoryList = () => {
       </div>
     </div>
   );
-};
-
-export default CategoryList;
+}

@@ -1,10 +1,10 @@
 import Message from "../../components/Message";
 import Loader from "../../components/Loader";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useGetOrdersQuery } from "../../redux/api/orderApiSlice";
-import AdminMenu from "./AdminMenu";
+import AdminMenu from "../../components/Admin/AdminMenu";
 
-const OrderList = () => {
+export default function OrderList() {
   const { data: orders, isLoading, error } = useGetOrdersQuery();
 
   return (
@@ -88,6 +88,4 @@ const OrderList = () => {
       )}
     </>
   );
-};
-
-export default OrderList;
+}

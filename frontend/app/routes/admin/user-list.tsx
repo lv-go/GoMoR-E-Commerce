@@ -9,9 +9,9 @@ import {
 } from "../../redux/api/usersApiSlice";
 import { toast } from "react-toastify";
 // ⚠️⚠️⚠️ don't forget this ⚠️⚠️⚠️⚠️
-// import AdminMenu from "./AdminMenu";
+// import AdminMenu from "./admin-menu";
 
-const UserList = () => {
+export default function UserList() {
   const { data: users, refetch, isLoading, error } = useGetUsersQuery();
 
   const [deleteUser] = useDeleteUserMutation();
@@ -168,6 +168,4 @@ const UserList = () => {
       )}
     </div>
   );
-};
-
-export default UserList;
+}

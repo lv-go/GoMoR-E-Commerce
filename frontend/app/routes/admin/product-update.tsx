@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import AdminMenu from "./AdminMenu";
-import { useNavigate, useParams } from "react-router-dom";
+import AdminMenu from "../../components/Admin/AdminMenu";
+import { useNavigate, useParams } from "react-router";
 import {
   useUpdateProductMutation,
   useDeleteProductMutation,
@@ -10,7 +10,7 @@ import {
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
 
-const AdminProductUpdate = () => {
+export default function AdminProductUpdate() {
   const params = useParams();
 
   const { data: productData } = useGetProductByIdQuery(params._id);
@@ -264,6 +264,4 @@ const AdminProductUpdate = () => {
       </div>
     </>
   );
-};
-
-export default AdminProductUpdate;
+}

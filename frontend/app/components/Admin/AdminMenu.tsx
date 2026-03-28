@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink } from "react-router";
 import { FaTimes } from "react-icons/fa";
 
 const AdminMenu = () => {
@@ -12,9 +12,8 @@ const AdminMenu = () => {
   return (
     <>
       <button
-        className={`${
-          isMenuOpen ? "top-2 right-2" : "top-5 right-7"
-        } bg-[#151515] p-2 fixed rounded-lg`}
+        className={`${isMenuOpen ? "top-2 right-2" : "top-5 right-7"
+          } bg-[#151515] p-2 fixed rounded-lg`}
         onClick={toggleMenu}
       >
         {isMenuOpen ? (

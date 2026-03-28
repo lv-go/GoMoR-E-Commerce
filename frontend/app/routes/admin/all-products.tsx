@@ -1,9 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import moment from "moment";
 import { useAllProductsQuery } from "../../redux/api/productApiSlice";
-import AdminMenu from "./AdminMenu";
+import AdminMenu from "../../components/Admin/AdminMenu";
 
-const AllProducts = () => {
+export default function AllProducts() {
   const { data: products, isLoading, isError } = useAllProductsQuery();
 
   if (isLoading) {
@@ -87,6 +87,4 @@ const AllProducts = () => {
       </div>
     </>
   );
-};
-
-export default AllProducts;
+}

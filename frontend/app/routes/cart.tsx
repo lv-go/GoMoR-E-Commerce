@@ -1,9 +1,17 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { FaTrash } from "react-icons/fa";
 import { addToCart, removeFromCart } from "../redux/features/cart/cartSlice";
+import type { Route } from "./+types/cart";
 
-const Cart = () => {
+export function meta({ }: Route.MetaArgs) {
+  return [
+    { title: "GoMoR-E-Commerce - Cart" },
+    { name: "description", content: "Your shopping cart." },
+  ];
+}
+
+export default function Cart() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -110,6 +118,4 @@ const Cart = () => {
       </div>
     </>
   );
-};
-
-export default Cart;
+}

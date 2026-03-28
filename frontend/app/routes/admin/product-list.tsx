@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import {
   useCreateProductMutation,
   useUploadProductImageMutation,
 } from "../../redux/api/productApiSlice";
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
-import AdminMenu from "./AdminMenu";
+import AdminMenu from "../../components/Admin/AdminMenu";
 
-const ProductList = () => {
+export default function ProductList() {
   const [image, setImage] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -187,6 +187,4 @@ const ProductList = () => {
       </div>
     </div>
   );
-};
-
-export default ProductList;
+}

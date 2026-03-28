@@ -8,8 +8,8 @@ import { useGetProductsQuery, useGetTopProductsQuery } from "~/redux/api/product
 
 export function meta({ }: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "GoMoR-E-Commerce" },
+    { name: "description", content: "Welcome to GoMoR-E-Commerce!" },
   ];
 }
 
