@@ -13,12 +13,12 @@ deepEqual(JSON.parse(response.body), {
 })
 }}
 
-### Login with admin1 credentials should return 200
+### Login with user1 credentials should return 200
 POST http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=gomor-e-commerce
 Content-Type: application/json
 
 {
-    "email": "admin1@test.com",
+    "email": "user1@test.com",
     "password": "S3cr3tP@ssw0rd",
     "returnSecureToken": true
 }
@@ -31,7 +31,7 @@ $global.refreshToken = body.refreshToken;
 }}
 
 ### Get all products with auth token should return 200
-GET http://localhost:8080/api/v1/products
+GET http://localhost:8080/api/products
 Authorization: Bearer {{$global.idToken}}
 
 ?? status == 200
