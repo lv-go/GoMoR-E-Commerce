@@ -1,0 +1,47 @@
+### Get all products without auth token should return 200
+GET http://localhost:8080/api/products
+
+?? status == 200
+{{
+const {deepEqual} = require("assert")
+deepEqual(JSON.parse(response.body), {
+    items: null,
+    total: 0,
+    page: 1,
+    size: 10,
+    totalPages: 0
+})
+}}
+
+### Login with admin1 credentials should return 200
+POST http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=gomor-e-commerce
+Content-Type: application/json
+
+{
+    "email": "admin1@test.com",
+    "password": "S3cr3tP@ssw0rd",
+    "returnSecureToken": true
+}
+
+?? status == 200
+{{
+const body = JSON.parse(response.body)
+$global.idToken = body.idToken;
+$global.refreshToken = body.refreshToken;
+}}
+
+### Get all products with auth token should return 200
+GET http://localhost:8080/api/v1/products
+Authorization: Bearer {{$global.idToken}}
+
+?? status == 200
+{{
+const {deepEqual} = require("assert")
+deepEqual(JSON.parse(response.body), {
+    items:null,
+    total:0,
+    page:1,
+    size:10,
+    totalPages:0
+})
+}}

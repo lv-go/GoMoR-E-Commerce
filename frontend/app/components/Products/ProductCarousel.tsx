@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 
 const ProductCarousel = () => {
-  const { data: products, isLoading, error } = useGetTopProductsQuery();
+  const { data: { items: products = [] }, isLoading, error } = useGetTopProductsQuery();
 
   const settings = {
     dots: false,
@@ -37,7 +37,7 @@ const ProductCarousel = () => {
           {...settings}
           className="xl:w-[50rem]  lg:w-[50rem] md:w-[56rem] sm:w-[40rem] sm:block"
         >
-          {products.map(
+          {products?.map(
             ({
               image,
               _id,

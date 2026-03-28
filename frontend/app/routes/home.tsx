@@ -43,7 +43,7 @@ export default function Home() {
                 {error?.data?.message || error?.error || "Something went wrong"}
               </Message>
             ) : (
-              data.products.map((product) => (
+              data.products?.map((product) => (
                 <div key={product._id}>
                   <Product product={product} />
                 </div>

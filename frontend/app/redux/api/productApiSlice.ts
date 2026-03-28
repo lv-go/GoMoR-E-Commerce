@@ -72,7 +72,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
     }),
 
     getTopProducts: builder.query({
-      query: () => `${PRODUCT_URL}/top`,
+      query: () => `${PRODUCT_URL}?limit=10&sort=-rating`,
       keepUnusedDataFor: 5,
     }),
 

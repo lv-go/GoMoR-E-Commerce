@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Setup(ctx context.Context) *http.ServeMux {
+func Setup(ctx context.Context) http.Handler {
 	// Connect to database
 	db := ConnectDB(ctx)
 
@@ -29,7 +29,7 @@ func Setup(ctx context.Context) *http.ServeMux {
 	authMiddleware := auth.NewAuthMiddleware(authClient)
 
 	// API base handler
-	apiPath := "/api/v1"
+	apiPath := "/api"
 	apiMux := http.NewServeMux()
 	mux.Handle(apiPath+"/", http.StripPrefix(apiPath, apiMux))
 
@@ -68,5 +68,15 @@ func Setup(ctx context.Context) *http.ServeMux {
 		w.Write([]byte("OK"))
 	})
 
-	return mux
+	// Add CORS middleware
+	corsMiddleware := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			next.ServeHTTP(w, r)
+		})
+	}
+
+	return corsMiddleware(mux)
 }
