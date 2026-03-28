@@ -2,11 +2,15 @@
 import React from 'react'
 import AdminMenu from '../../components/Admin/AdminMenu'
 import { Outlet, redirect } from 'react-router'
+import { getCurrentUser } from '~/firebase-config';
 
 export async function clientLoader() {
-  const userInfo = localStorage.getItem("userInfo");
-  if (!userInfo) {
+  const user = await getCurrentUser();
+  if (!user) {
     return redirect("/login");
+  }
+  if (user.role !== "admin") {
+    return redirect("/");
   }
   return null;
 }

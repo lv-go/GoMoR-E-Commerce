@@ -14,6 +14,7 @@ import store from "./redux/store";
 import Navigation from "./components/Navigation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { FirebaseAuthProvider } from "./FirebaseAuthContext";
 
 
 export const links: Route.LinksFunction = () => [
@@ -49,10 +50,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return <Provider store={store}>
-
-    <ToastContainer />
-    <Navigation />
-    <Outlet />
+    <FirebaseAuthProvider>
+      <ToastContainer />
+      <Navigation />
+      <Outlet />
+    </FirebaseAuthProvider>
   </Provider>;
 }
 

@@ -1,41 +1,46 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
-import Loader from "../../components/Loader";
-import { useLoginMutation } from "../../redux/api/usersApiSlice";
-import { setCredentials } from "../../redux/features/auth/authSlice";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
+import z from "zod";
+import { auth } from "~/firebase-config";
+import Loader from "../../components/Loader";
+
+const credentials = z.object({
+  email: z.email(),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+});
+
+type Credentials = z.infer<typeof credentials>;
+
+export function meta() {
+  return [
+    { title: "GoMoR-E-Commerce - Login" },
+    { name: "description", content: "Login to your account." },
+  ];
+}
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors } } = useForm<Credentials>({
+    resolver: zodResolver(credentials),
+  });
 
-  const [login, { isLoading }] = useLoginMutation();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
 
-  const { userInfo } = useSelector((state) => state.auth);
-
-  const { search } = useLocation();
-  const sp = new URLSearchParams(search);
-  const redirect = sp.get("redirect") || "/";
-
-  useEffect(() => {
-    if (userInfo) {
-      navigate(redirect);
-    }
-  }, [navigate, redirect, userInfo]);
-
-  const submitHandler = async (e) => {
-    e.preventDefault();
+  const login = async (data: Credentials) => {
     try {
-      const res = await login({ email, password }).unwrap();
-      console.log(res);
-      dispatch(setCredentials({ ...res }));
+      setIsLoading(true);
+      await signInWithEmailAndPassword(auth, data.email, data.password);
       navigate(redirect);
-    } catch (err) {
+    } catch (err: any) {
       toast.error(err?.data?.message || err.error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -43,9 +48,9 @@ export default function Login() {
     <div>
       <section className="pl-[10rem] flex flex-wrap">
         <div className="mr-[4rem] mt-[5rem]">
-          <h1 className="text-2xl font-semibold mb-4">Sign In</h1>
+          <h1 className="text-2xl font-semibold mb-4">Login</h1>
 
-          <form onSubmit={submitHandler} className="container w-[40rem]">
+          <form onSubmit={handleSubmit(login)} className="container w-[40rem]">
             <div className="my-[2rem]">
               <label
                 htmlFor="email"
@@ -58,9 +63,9 @@ export default function Login() {
                 id="email"
                 className="mt-1 p-2 border rounded w-full"
                 placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register("email")}
               />
+              {errors.email && <p className="text-red-500">{errors.email.message}</p>}
             </div>
 
             <div className="mb-4">
@@ -75,9 +80,9 @@ export default function Login() {
                 id="password"
                 className="mt-1 p-2 border rounded w-full"
                 placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
               />
+              {errors.password && <p className="text-red-500">{errors.password.message}</p>}
             </div>
 
             <button

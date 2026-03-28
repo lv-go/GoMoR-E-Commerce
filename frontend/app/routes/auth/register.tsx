@@ -1,49 +1,51 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
-import Loader from "../../components/Loader";
-import { useRegisterMutation } from "../../redux/api/usersApiSlice";
-import { setCredentials } from "../../redux/features/auth/authSlice";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "react-toastify";
+import z from "zod";
+import { auth } from "~/firebase-config";
+import Loader from "../../components/Loader";
 
-const Register = () => {
-  const [username, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+const RegisterSchema = z.object({
+  displayName: z.string().min(3, "Username must be at least 3 characters long"),
+  email: z.email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+  confirmPassword: z.string().min(6, "Confirm password must be at least 6 characters long"),
+});
 
-  const dispatch = useDispatch();
+type RegisterFormValues = z.infer<typeof RegisterSchema>;
+
+export function meta() {
+  return [
+    { title: "GoMoR-E-Commerce - Register" },
+    { name: "description", content: "Register for a new account." },
+  ];
+}
+
+export default function Register() {
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
+    resolver: zodResolver(RegisterSchema),
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
-  const [register, { isLoading }] = useRegisterMutation();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/";
 
-  const { userInfo } = useSelector((state) => state.auth);
-
-  const { search } = useLocation();
-  const sp = new URLSearchParams(search);
-  const redirect = sp.get("redirect") || "/";
-
-  useEffect(() => {
-    if (userInfo) {
+  const submitHandler = async (data: RegisterFormValues) => {
+    try {
+      setIsLoading(true);
+      await createUserWithEmailAndPassword(auth, data.email, data.password);
       navigate(redirect);
-    }
-  }, [navigate, redirect, userInfo]);
-
-  const submitHandler = async (e) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-    } else {
-      try {
-        const res = await register({ username, email, password }).unwrap();
-        dispatch(setCredentials({ ...res }));
-        navigate(redirect);
-        toast.success("User successfully registered");
-      } catch (err) {
-        console.log(err);
-        toast.error(err.data.message);
-      }
+      toast.success("User successfully registered");
+    } catch (err: any) {
+      toast.error(err?.data?.message || err.error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,22 +54,22 @@ const Register = () => {
       <div className="mr-[4rem] mt-[5rem]">
         <h1 className="text-2xl font-semibold mb-4">Register</h1>
 
-        <form onSubmit={submitHandler} className="container w-[40rem]">
+        <form onSubmit={handleSubmit(submitHandler)} className="container w-[40rem]">
           <div className="my-[2rem]">
             <label
               htmlFor="name"
               className="block text-sm font-medium text-white"
             >
-              Name
+              Display Name
             </label>
             <input
               type="text"
               id="name"
               className="mt-1 p-2 border rounded w-full"
-              placeholder="Enter name"
-              value={username}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter display name"
+              {...register("displayName")}
             />
+            {errors.displayName && <p className="text-red-500">{errors.displayName.message}</p>}
           </div>
 
           <div className="my-[2rem]">
@@ -82,9 +84,9 @@ const Register = () => {
               id="email"
               className="mt-1 p-2 border rounded w-full"
               placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email")}
             />
+            {errors.email && <p className="text-red-500">{errors.email.message}</p>}
           </div>
 
           <div className="my-[2rem]">
@@ -99,9 +101,9 @@ const Register = () => {
               id="password"
               className="mt-1 p-2 border rounded w-full"
               placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              {...register("password")}
             />
+            {errors.password && <p className="text-red-500">{errors.password.message}</p>}
           </div>
 
           <div className="my-[2rem]">
@@ -116,9 +118,9 @@ const Register = () => {
               id="confirmPassword"
               className="mt-1 p-2 border rounded w-full"
               placeholder="Confirm password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              {...register("confirmPassword")}
             />
+            {errors.confirmPassword && <p className="text-red-500">{errors.confirmPassword.message}</p>}
           </div>
 
           <button
@@ -151,6 +153,4 @@ const Register = () => {
       />
     </section>
   );
-};
-
-export default Register;
+}

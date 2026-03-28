@@ -1,22 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AiOutlineHome,
-  AiOutlineShopping,
   AiOutlineLogin,
-  AiOutlineUserAdd,
+  AiOutlineShopping,
   AiOutlineShoppingCart,
+  AiOutlineUserAdd,
 } from "react-icons/ai";
 import { FaHeart } from "react-icons/fa";
-import { Link } from "react-router";
-import { useNavigate } from "react-router";
-import "./Navigation.css";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router";
 import { useLogoutMutation } from "../redux/api/usersApiSlice";
 import { logout } from "../redux/features/auth/authSlice";
+import "./Navigation.css";
 import FavoritesCount from "./Products/FavoritesCount";
+import { useFirebaseAuth } from "~/FirebaseAuthContext";
+import { auth } from "~/firebase-config";
 
 const Navigation = () => {
-  const { userInfo } = useSelector((state: any) => state.auth);
+  const { user } = useFirebaseAuth();
   const { cartItems } = useSelector((state: any) => state.cart);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -26,15 +27,11 @@ const Navigation = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const [logoutApiCall] = useLogoutMutation();
 
   const logoutHandler = async () => {
     try {
-      await logoutApiCall().unwrap();
-      dispatch(logout());
+      await auth.signOut();
       navigate("/login");
     } catch (error) {
       console.error(error);
@@ -75,7 +72,7 @@ const Navigation = () => {
             {cartItems.length > 0 && (
               <span>
                 <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
-                  {cartItems.reduce((a, c) => a + c.qty, 0)}
+                  {cartItems.reduce((a: number, c: any) => a + c.qty, 0)}
                 </span>
               </span>
             )}
@@ -98,12 +95,12 @@ const Navigation = () => {
           onClick={toggleDropdown}
           className="flex items-center text-gray-800 focus:outline-none"
         >
-          {userInfo ? (
-            <span className="text-white">{userInfo.username}</span>
+          {user ? (
+            <span className="text-white">{user.displayName}</span>
           ) : (
             <></>
           )}
-          {userInfo && (
+          {user && (
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className={`h-4 w-4 ml-1 ${dropdownOpen ? "transform rotate-180" : ""
@@ -122,16 +119,16 @@ const Navigation = () => {
           )}
         </button>
 
-        {dropdownOpen && userInfo && (
+        {dropdownOpen && user && (
           <ul
-            className={`absolute right-0 mt-2 mr-14 space-y-2 bg-white text-gray-600 ${!userInfo.isAdmin ? "-top-20" : "-top-80"
+            className={`absolute right-0 mt-2 mr-14 space-y-2 bg-white text-gray-600 ${!user.role ? "-top-20" : "-top-80"
               } `}
           >
-            {userInfo.isAdmin && (
+            {user.role === "admin" && (
               <>
                 <li>
                   <Link
-                    to="/admin/dashboard"
+                    to="/admin"
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
                     Dashboard
@@ -139,7 +136,7 @@ const Navigation = () => {
                 </li>
                 <li>
                   <Link
-                    to="/admin/productlist"
+                    to="/admin/products"
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
                     Products
@@ -147,7 +144,7 @@ const Navigation = () => {
                 </li>
                 <li>
                   <Link
-                    to="/admin/categorylist"
+                    to="/admin/categories"
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
                     Category
@@ -155,7 +152,7 @@ const Navigation = () => {
                 </li>
                 <li>
                   <Link
-                    to="/admin/orderlist"
+                    to="/admin/orders"
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
                     Orders
@@ -163,7 +160,7 @@ const Navigation = () => {
                 </li>
                 <li>
                   <Link
-                    to="/admin/userlist"
+                    to="/admin/users"
                     className="block px-4 py-2 hover:bg-gray-100"
                   >
                     Users
@@ -187,7 +184,7 @@ const Navigation = () => {
             </li>
           </ul>
         )}
-        {!userInfo && (
+        {!user && (
           <ul>
             <li>
               <Link

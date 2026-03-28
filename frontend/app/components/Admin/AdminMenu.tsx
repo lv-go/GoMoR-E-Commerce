@@ -33,7 +33,7 @@ const AdminMenu = () => {
             <li>
               <NavLink
                 className="list-item py-2 px-3 block mb-5 hover:bg-[#2E2D2D] rounded-sm"
-                to="/admin/dashboard"
+                to="/admin"
                 style={({ isActive }) => ({
                   color: isActive ? "greenyellow" : "white",
                 })}
@@ -44,7 +44,7 @@ const AdminMenu = () => {
             <li>
               <NavLink
                 className="list-item py-2 px-3 block mb-5 hover:bg-[#2E2D2D] rounded-sm"
-                to="/admin/categorylist"
+                to="/admin/categories"
                 style={({ isActive }) => ({
                   color: isActive ? "greenyellow" : "white",
                 })}
@@ -55,7 +55,7 @@ const AdminMenu = () => {
             <li>
               <NavLink
                 className="list-item py-2 px-3 block mb-5 hover:bg-[#2E2D2D] rounded-sm"
-                to="/admin/productlist"
+                to="/admin/products"
                 style={({ isActive }) => ({
                   color: isActive ? "greenyellow" : "white",
                 })}
@@ -77,7 +77,7 @@ const AdminMenu = () => {
             <li>
               <NavLink
                 className="list-item py-2 px-3 block mb-5 hover:bg-[#2E2D2D] rounded-sm"
-                to="/admin/userlist"
+                to="/admin/users"
                 style={({ isActive }) => ({
                   color: isActive ? "greenyellow" : "white",
                 })}
@@ -88,7 +88,7 @@ const AdminMenu = () => {
             <li>
               <NavLink
                 className="list-item py-2 px-3 block mb-5 hover:bg-[#2E2D2D] rounded-sm"
-                to="/admin/orderlist"
+                to="/admin/orders"
                 style={({ isActive }) => ({
                   color: isActive ? "greenyellow" : "white",
                 })}

@@ -6,22 +6,29 @@ import Loader from "../../components/Loader";
 import { useProfileMutation } from "../../redux/api/usersApiSlice";
 import { setCredentials } from "../../redux/features/auth/authSlice";
 import { Link } from "react-router";
+import { useFirebaseAuth } from "~/FirebaseAuthContext";
+import z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
-const Profile = () => {
-  const [username, setUserName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+const ProfileSchema = z.object({
+  displayName: z.string().min(3, "Username must be at least 3 characters long"),
+  email: z.email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+  confirmPassword: z.string().min(6, "Confirm password must be at least 6 characters long"),
+});
 
-  const { userInfo } = useSelector((state) => state.auth);
+type Profile = z.infer<typeof ProfileSchema>;
+
+export default function ProfilePage() {
+  const { register, handleSubmit, formState: { errors } } = useForm<Profile>({
+    resolver: zodResolver(ProfileSchema),
+  });
+
+  const { user: userInfo } = useFirebaseAuth();
 
   const [updateProfile, { isLoading: loadingUpdateProfile }] =
     useProfileMutation();
-
-  useEffect(() => {
-    setUserName(userInfo.username);
-    setEmail(userInfo.email);
-  }, [userInfo.email, userInfo.username]);
 
   const dispatch = useDispatch();
 
@@ -46,7 +53,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 mt-[10rem]">
+    <div className="container mx-auto p-4 _mt-[10rem]">
       <div className="flex justify-center align-center md:flex md:space-x-4">
         <div className="md:w-1/3">
           <h2 className="text-2xl font-semibold mb-4">Update Profile</h2>
@@ -57,9 +64,9 @@ const Profile = () => {
                 type="text"
                 placeholder="Enter name"
                 className="form-input p-4 rounded-sm w-full"
-                value={username}
-                onChange={(e) => setUserName(e.target.value)}
+                {...register("displayName")}
               />
+              {errors.displayName && <p className="text-red-500">{errors.displayName.message}</p>}
             </div>
 
             <div className="mb-4">
@@ -68,9 +75,9 @@ const Profile = () => {
                 type="email"
                 placeholder="Enter email"
                 className="form-input p-4 rounded-sm w-full"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register("email")}
               />
+              {errors.email && <p className="text-red-500">{errors.email.message}</p>}
             </div>
 
             <div className="mb-4">
@@ -79,9 +86,9 @@ const Profile = () => {
                 type="password"
                 placeholder="Enter password"
                 className="form-input p-4 rounded-sm w-full"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
               />
+              {errors.password && <p className="text-red-500">{errors.password.message}</p>}
             </div>
 
             <div className="mb-4">
@@ -90,9 +97,9 @@ const Profile = () => {
                 type="password"
                 placeholder="Confirm password"
                 className="form-input p-4 rounded-sm w-full"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                {...register("confirmPassword")}
               />
+              {errors.confirmPassword && <p className="text-red-500">{errors.confirmPassword.message}</p>}
             </div>
 
             <div className="flex justify-between">
@@ -116,6 +123,4 @@ const Profile = () => {
       </div>
     </div>
   );
-};
-
-export default Profile;
+}
