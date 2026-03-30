@@ -25,7 +25,7 @@ func TestOrderHandler(t *testing.T) {
 	mux.HandleFunc("POST /orders", handler.Create)
 	mux.HandleFunc("GET /orders/{id}", handler.FindById)
 	mux.HandleFunc("PUT /orders/{id}", handler.Update)
-	mux.HandleFunc("DELETE /orders/{id}", handler.Delete)
+	mux.HandleFunc("DELETE /orders/{id}", handler.DeleteById)
 	mux.HandleFunc("GET /orders", handler.FindPage)
 
 	order := &models.Order{

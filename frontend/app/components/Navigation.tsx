@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AiOutlineHome,
   AiOutlineLogin,
@@ -6,15 +6,13 @@ import {
   AiOutlineShoppingCart,
   AiOutlineUserAdd,
 } from "react-icons/ai";
-import { FaHeart } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router";
-import { useLogoutMutation } from "../redux/api/usersApiSlice";
-import { logout } from "../redux/features/auth/authSlice";
-import "./Navigation.css";
-import FavoritesCount from "./Products/FavoritesCount";
+import { FaBox, FaBriefcase, FaChartBar, FaHeart, FaShoppingBag, FaShoppingCart, FaSignOutAlt, FaTags, FaUser, FaUsers } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { Link, NavLink, useNavigate } from "react-router";
 import { useFirebaseAuth } from "~/FirebaseAuthContext";
 import { auth } from "~/firebase-config";
+// import "./Navigation.css";
+import FavoritesCount from "./Products/FavoritesCount";
 
 const Navigation = () => {
   const { user } = useFirebaseAuth();
@@ -39,34 +37,34 @@ const Navigation = () => {
   };
 
   return (
-    <div
-      style={{ zIndex: 9999 }}
-      className={`${showSidebar ? "hidden" : "flex"
-        } xl:flex lg:flex md:hidden sm:hidden flex-col justify-between p-4 text-white bg-[#000] w-[4%] hover:w-[15%] h-[100vh]  fixed `}
-      id="navigation-container"
-    >
-      <div className="flex flex-col justify-center space-y-4">
-        <Link
+    <ul className="menu w-full grow">
+      <li>
+        <NavLink
           to="/"
-          className="flex items-center transition-transform transform hover:translate-x-2"
+          className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+          data-tip="Home"
         >
-          <AiOutlineHome className="mr-2 mt-[3rem]" size={26} />
-          <span className="hidden nav-item-name mt-[3rem]">HOME</span>{" "}
-        </Link>
+          <AiOutlineHome className="my-1.5 inline-block size-4" />
+          <span className="is-drawer-close:hidden">HOME</span>
+        </NavLink>
+      </li>
 
+      <li>
         <Link
           to="/shop"
-          className="flex items-center transition-transform transform hover:translate-x-2"
+          className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+          data-tip="Shop"
         >
-          <AiOutlineShopping className="mr-2 mt-[3rem]" size={26} />
-          <span className="hidden nav-item-name mt-[3rem]">SHOP</span>{" "}
+          <AiOutlineShopping className="my-1.5 inline-block size-4" />
+          <span className="is-drawer-close:hidden">SHOP</span>
         </Link>
+      </li>
 
-        <Link to="/cart" className="flex relative">
-          <div className="flex items-center transition-transform transform hover:translate-x-2">
-            <AiOutlineShoppingCart className="mt-[3rem] mr-2" size={26} />
-            <span className="hidden nav-item-name mt-[3rem]">Cart</span>{" "}
-          </div>
+
+      <li>
+        <Link to="/cart" data-tip="Cart" className="is-drawer-close:tooltip is-drawer-close:tooltip-right">
+          <AiOutlineShoppingCart className="my-1.5 inline-block size-4" />
+          <span className="is-drawer-close:hidden">Cart</span>
 
           <div className="absolute top-9">
             {cartItems.length > 0 && (
@@ -78,19 +76,120 @@ const Navigation = () => {
             )}
           </div>
         </Link>
+      </li>
 
-        <Link to="/favorites" className="flex relative">
-          <div className="flex justify-center items-center transition-transform transform hover:translate-x-2">
-            <FaHeart className="mt-[3rem] mr-2" size={20} />
-            <span className="hidden nav-item-name mt-[3rem]">
-              Favorites
-            </span>{" "}
+      <li>
+        <Link to="/favorites" data-tip="Favorites" className="is-drawer-close:tooltip is-drawer-close:tooltip-right">
+          <FaHeart className="my-1.5 inline-block size-4" />
+          <span className="is-drawer-close:hidden">Favorites</span>
+          {/* <div className="">
             <FavoritesCount />
-          </div>
+          </div> */}
         </Link>
-      </div>
+      </li>
+      {user && (
+        <>
+          {user.role === "admin" && (
+            <>
+              <li>
+                <Link
+                  to="/admin"
+                  className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                  data-tip="Dashboard"
+                >
+                  <FaChartBar className="my-1.5 inline-block size-4" />
+                  <span className="is-drawer-close:hidden">Dashboard</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/admin/products"
+                  className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                  data-tip="Products"
+                >
+                  <FaBox className="my-1.5 inline-block size-4" />
+                  <span className="is-drawer-close:hidden">Products</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/admin/categories"
+                  className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                  data-tip="Categories"
+                >
+                  <FaTags className="my-1.5 inline-block size-4" />
+                  <span className="is-drawer-close:hidden">Categories</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/admin/orders"
+                  className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                  data-tip="Orders"
+                >
+                  <FaBriefcase className="my-1.5 inline-block size-4" />
+                  <span className="is-drawer-close:hidden">Orders</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/admin/users"
+                  className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                  data-tip="Users"
+                >
+                  <FaUsers className="my-1.5 inline-block size-4" />
+                  <span className="is-drawer-close:hidden">Users</span>
+                </Link>
+              </li>
+            </>
+          )}
 
-      <div className="relative">
+          <li>
+            <Link to="/profile" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Profile">
+              <FaUser className="my-1.5 inline-block size-4" />
+              <span className="is-drawer-close:hidden">Profile</span>
+            </Link>
+          </li>
+          <li>
+            <button
+              onClick={logoutHandler}
+              className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+              data-tip="Logout"
+            >
+              <FaSignOutAlt className="my-1.5 inline-block size-4" />
+              <span className="is-drawer-close:hidden">Logout</span>
+            </button>
+          </li>
+        </>
+      )
+      }
+      {
+        !user && (
+          <>
+            <li>
+              <Link
+                to="/login"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Login"
+              >
+                <AiOutlineLogin className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">LOGIN</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/register"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Register"
+              >
+                <AiOutlineUserAdd className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">REGISTER</span>
+              </Link>
+            </li>
+          </>
+        )
+      }
+      {/* <li>
         <button
           onClick={toggleDropdown}
           className="flex items-center text-gray-800 focus:outline-none"
@@ -124,90 +223,9 @@ const Navigation = () => {
             className={`absolute right-0 mt-2 mr-14 space-y-2 bg-white text-gray-600 ${!user.role ? "-top-20" : "-top-80"
               } `}
           >
-            {user.role === "admin" && (
-              <>
-                <li>
-                  <Link
-                    to="/admin"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/products"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Products
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/categories"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Category
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/orders"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Orders
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/admin/users"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    Users
-                  </Link>
-                </li>
-              </>
-            )}
+             */}
 
-            <li>
-              <Link to="/profile" className="block px-4 py-2 hover:bg-gray-100">
-                Profile
-              </Link>
-            </li>
-            <li>
-              <button
-                onClick={logoutHandler}
-                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-              >
-                Logout
-              </button>
-            </li>
-          </ul>
-        )}
-        {!user && (
-          <ul>
-            <li>
-              <Link
-                to="/login"
-                className="flex items-center mt-5 transition-transform transform hover:translate-x-2"
-              >
-                <AiOutlineLogin className="mr-2 mt-[4px]" size={26} />
-                <span className="hidden nav-item-name">LOGIN</span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/register"
-                className="flex items-center mt-5 transition-transform transform hover:translate-x-2"
-              >
-                <AiOutlineUserAdd size={26} />
-                <span className="hidden nav-item-name">REGISTER</span>
-              </Link>
-            </li>
-          </ul>
-        )}
-      </div>
-    </div>
+    </ul >
   );
 };
 

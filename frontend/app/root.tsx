@@ -15,6 +15,8 @@ import Navigation from "./components/Navigation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FirebaseAuthProvider } from "./FirebaseAuthContext";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./utils/query-client";
 
 
 export const links: Route.LinksFunction = () => [
@@ -50,11 +52,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return <Provider store={store}>
-    <FirebaseAuthProvider>
-      <ToastContainer />
-      <Navigation />
-      <Outlet />
-    </FirebaseAuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <FirebaseAuthProvider>
+        <ToastContainer />
+        <div className="drawer lg:drawer-open">
+          <input id="root-drawer" type="checkbox" className="drawer-toggle" />
+          <div className="drawer-content">
+            <Outlet />
+          </div>
+
+          <div className="drawer-side is-drawer-close:overflow-visible">
+            <label htmlFor="root-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
+            <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
+              <Navigation />
+            </div>
+          </div>
+        </div>
+      </FirebaseAuthProvider>
+    </QueryClientProvider>
   </Provider>;
 }
 

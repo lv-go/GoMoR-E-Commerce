@@ -25,7 +25,7 @@ func TestCategoryHandler(t *testing.T) {
 	mux.HandleFunc("POST /categories", handler.Create)
 	mux.HandleFunc("GET /categories/{id}", handler.FindById)
 	mux.HandleFunc("PUT /categories/{id}", handler.Update)
-	mux.HandleFunc("DELETE /categories/{id}", handler.Delete)
+	mux.HandleFunc("DELETE /categories/{id}", handler.DeleteById)
 	mux.HandleFunc("GET /categories", handler.FindPage)
 
 	category := &models.Category{

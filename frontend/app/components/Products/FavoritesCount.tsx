@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 
 const FavoritesCount = () => {
-  const favorites = useSelector((state) => state.favorites);
+  const favorites = useSelector((state: any) => state.favorites);
   const favoriteCount = favorites.length;
 
   return (

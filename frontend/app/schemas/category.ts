@@ -6,3 +6,11 @@ export const categorySchema = z.object({
 });
 
 export type Category = z.infer<typeof categorySchema>;
+
+export function newCategory(): Category {
+  return { _id: "", name: "" };
+}
+
+export function getId(category: Category): string {
+  return category._id || "";
+}

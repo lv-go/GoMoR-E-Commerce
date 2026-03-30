@@ -25,7 +25,7 @@ func TestProductHandler(t *testing.T) {
 	mux.HandleFunc("POST /products", handler.Create)
 	mux.HandleFunc("GET /products/{id}", handler.FindById)
 	mux.HandleFunc("PUT /products/{id}", handler.Update)
-	mux.HandleFunc("DELETE /products/{id}", handler.Delete)
+	mux.HandleFunc("DELETE /products/{id}", handler.DeleteById)
 	mux.HandleFunc("GET /products", handler.FindPage)
 
 	product := &models.Product{

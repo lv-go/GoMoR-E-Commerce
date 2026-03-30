@@ -6,7 +6,7 @@ export interface Page<T> {
   totalPages: number;
 }
 
-export interface PaginationParams {
+export interface PageRequest {
   offset?: number;
   limit?: number;
 }

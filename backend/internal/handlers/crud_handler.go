@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"gomor-e-commerce/internal/repository"
+	"gomor-e-commerce/internal/utils"
 	"log/slog"
 	"net/http"
 	"reflect"
@@ -92,7 +93,7 @@ func (h *CRUDHandler[T, ID]) Update(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(entity)
 }
 
-func (h *CRUDHandler[T, ID]) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *CRUDHandler[T, ID]) DeleteById(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("Delete", "id", r.PathValue("id"))
 	id, err := h.parseID(r)
 	if err != nil {
@@ -104,7 +105,7 @@ func (h *CRUDHandler[T, ID]) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	utils.WriteJSONMessage(w, http.StatusOK, "Deleted successfully")
 }
 
 func (h *CRUDHandler[T, ID]) FindPage(w http.ResponseWriter, r *http.Request) {

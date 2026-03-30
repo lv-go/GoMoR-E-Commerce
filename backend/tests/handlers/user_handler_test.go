@@ -25,7 +25,7 @@ func TestUserHandler(t *testing.T) {
 	mux.HandleFunc("POST /users", handler.Create)
 	mux.HandleFunc("GET /users/{id}", handler.FindById)
 	mux.HandleFunc("PUT /users/{id}", handler.Update)
-	mux.HandleFunc("DELETE /users/{id}", handler.Delete)
+	mux.HandleFunc("DELETE /users/{id}", handler.DeleteById)
 	mux.HandleFunc("GET /users", handler.FindPage)
 
 	user := &models.User{
