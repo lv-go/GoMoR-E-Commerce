@@ -1,10 +1,20 @@
-import Message from "../../components/Message";
-import Loader from "../../components/Loader";
 import { Link } from "react-router";
-import { useGetMyOrdersQuery } from "../../redux/api/orderApiSlice";
+import { useGetPage } from "~/hooks/orders";
+import Loader from "../../components/Loader";
+import Message from "../../components/Message";
+import type { Route } from "./+types/orders";
 
-const UserOrder = () => {
-  const { data: orders, isLoading, error } = useGetMyOrdersQuery();
+export function meta({ }: Route.MetaArgs) {
+  return [
+    { title: "My Orders" },
+    { name: "description", content: "My Orders" },
+  ];
+}
+
+
+export default function UserOrders() {
+  const { data, isLoading, error } = useGetPage();
+  const orders = data?.items || [];
 
   return (
     <div className="container mx-auto">
@@ -13,7 +23,7 @@ const UserOrder = () => {
       {isLoading ? (
         <Loader />
       ) : error ? (
-        <Message variant="danger">{error?.data?.error || error.error}</Message>
+        <Message variant="danger">{error.message}</Message>
       ) : (
         <table className="w-full">
           <thead>
@@ -79,6 +89,4 @@ const UserOrder = () => {
       )}
     </div>
   );
-};
-
-export default UserOrder;
+}

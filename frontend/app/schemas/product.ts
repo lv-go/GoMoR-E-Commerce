@@ -6,8 +6,8 @@ export const reviewSchema = z.object({
   rating: z.number().min(0).max(5),
   comment: z.string().min(1),
   user: z.string(), // ObjectId as string
-  createdAt: z.string().datetime().optional(),
-  updatedAt: z.string().datetime().optional(),
+  createdAt: z.iso.datetime().optional(),
+  updatedAt: z.iso.datetime().optional(),
 });
 
 export const productSchema = z.object({
@@ -23,9 +23,25 @@ export const productSchema = z.object({
   numReviews: z.number().int().min(0).default(0),
   price: z.number().min(0).default(0),
   countInStock: z.number().int().min(0).default(0),
-  createdAt: z.string().datetime().optional(),
-  updatedAt: z.string().datetime().optional(),
+  createdAt: z.iso.datetime().optional(),
+  updatedAt: z.iso.datetime().optional(),
 });
 
 export type Review = z.infer<typeof reviewSchema>;
 export type Product = z.infer<typeof productSchema>;
+
+export const newProduct = (): Product => ({
+  name: "",
+  image: "",
+  brand: "",
+  quantity: 0,
+  category: "",
+  description: "",
+  reviews: [],
+  rating: 0,
+  numReviews: 0,
+  price: 0,
+  countInStock: 0,
+});
+
+export const getId = (item: Product) => item._id || "";

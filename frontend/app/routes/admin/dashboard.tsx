@@ -8,10 +8,10 @@ import {
 
 import { useState, useEffect } from "react";
 import AdminMenu from "../../components/Admin/AdminMenu";
-import OrderList from "./order-list";
+import OrderList from "./orders";
 import Loader from "../../components/Loader";
 
-const AdminDashboard = () => {
+export default function Dashboard() {
   const { data: sales, isLoading } = useGetTotalSalesQuery();
   const { data: customers, isLoading: loading } = useGetUsersQuery();
   const { data: orders, isLoading: loadingTwo } = useGetTotalOrdersQuery();
@@ -141,6 +141,4 @@ const AdminDashboard = () => {
       </section>
     </>
   );
-};
-
-export default AdminDashboard;
+}

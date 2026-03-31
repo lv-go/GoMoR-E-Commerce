@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
-import Loader from "../../components/Loader";
-import { useProfileMutation } from "../../redux/api/usersApiSlice";
-import { setCredentials } from "../../redux/features/auth/authSlice";
-import { Link } from "react-router";
-import { useFirebaseAuth } from "~/FirebaseAuthContext";
-import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router";
+import z from "zod";
+import { useFirebaseAuth } from "~/FirebaseAuthContext";
+import Loader from "../../components/Loader";
+import { useProfileMutation } from "../../redux/api/usersApiSlice";
+import { updateEmail, updatePassword, updateProfile } from "firebase/auth";
 
 const ProfileSchema = z.object({
   displayName: z.string().min(3, "Username must be at least 3 characters long"),
@@ -21,32 +21,42 @@ const ProfileSchema = z.object({
 type Profile = z.infer<typeof ProfileSchema>;
 
 export default function ProfilePage() {
-  const { register, handleSubmit, formState: { errors } } = useForm<Profile>({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<Profile>({
     resolver: zodResolver(ProfileSchema),
   });
 
   const { user: userInfo } = useFirebaseAuth();
 
-  const [updateProfile, { isLoading: loadingUpdateProfile }] =
-    useProfileMutation();
+  useEffect(() => {
+    if (userInfo) {
+      reset({
+        displayName: userInfo.displayName || "",
+        email: userInfo.email || "",
+      });
+    }
+  }, [userInfo, reset]);
 
-  const dispatch = useDispatch();
-
-  const submitHandler = async (e) => {
-    e.preventDefault();
+  const submitHandler = async (data: Profile) => {
+    const { displayName, email, password, confirmPassword } = data;
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
     } else {
       try {
-        const res = await updateProfile({
-          _id: userInfo._id,
-          username,
-          email,
-          password,
-        }).unwrap();
-        dispatch(setCredentials({ ...res }));
+        if (!userInfo) {
+          toast.error("User not found");
+          return;
+        }
+        updateProfile(userInfo, {
+          displayName,
+        })
+        if (email !== userInfo.email) {
+          await updateEmail(userInfo, email);
+        }
+        if (password && password !== "" && password !== confirmPassword) {
+          await updatePassword(userInfo, password);
+        }
         toast.success("Profile updated successfully");
-      } catch (err) {
+      } catch (err: any) {
         toast.error(err?.data?.message || err.error);
       }
     }
@@ -57,7 +67,7 @@ export default function ProfilePage() {
       <div className="flex justify-center align-center md:flex md:space-x-4">
         <div className="md:w-1/3">
           <h2 className="text-2xl font-semibold mb-4">Update Profile</h2>
-          <form onSubmit={submitHandler}>
+          <form onSubmit={handleSubmit(submitHandler)}>
             <div className="mb-4">
               <label className="block text-white mb-2">Name</label>
               <input
@@ -117,7 +127,6 @@ export default function ProfilePage() {
                 My Orders
               </Link>
             </div>
-            {loadingUpdateProfile && <Loader />}
           </form>
         </div>
       </div>

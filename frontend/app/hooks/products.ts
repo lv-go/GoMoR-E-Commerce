@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth } from "../utils/api";
 import { type Product } from "../schemas/product";
-import { type Page } from "../schemas/api";
+import { type Page, type PageRequest } from "../schemas/api";
 
-export function useGetPage(offset: number = 0, limit: number = 10) {
+export function useGetPage({ offset, limit }: PageRequest) {
   return useQuery<Page<Product>>({
     queryKey: ["products", "page", { offset, limit }],
     queryFn: () => fetchWithAuth(`/products?offset=${offset}&limit=${limit}`),
