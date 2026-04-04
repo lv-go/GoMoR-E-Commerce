@@ -49,7 +49,13 @@ func TestProductHandler(t *testing.T) {
 		assert.Equal(t, product.Name, createdProduct.Name)
 		assert.Equal(t, product.Price, createdProduct.Price)
 		assert.NotNil(t, createdProduct.ID)
+		assert.NotEqual(t, primitive.NilObjectID, createdProduct.ID)
+		assert.NotNil(t, createdProduct.CreatedAt)
+		assert.NotNil(t, createdProduct.UpdatedAt)
+
 		product.ID = createdProduct.ID
+		product.CreatedAt = createdProduct.CreatedAt
+		product.UpdatedAt = createdProduct.UpdatedAt
 	})
 
 	t.Run("FindById", func(t *testing.T) {
@@ -91,7 +97,21 @@ func TestProductHandler(t *testing.T) {
 		assert.LessOrEqual(t, int32(1), page.Size)
 		assert.LessOrEqual(t, int32(1), page.TotalPages)
 		assert.LessOrEqual(t, 1, len(page.Items))
-		assert.Contains(t, page.Items, *product)
+		found := false
+		for _, item := range page.Items {
+			if item.ID != nil && item.ID.Hex() == product.ID.Hex() {
+				found = true
+				assert.Equal(t, product.Name, item.Name)
+				assert.Equal(t, product.Brand, item.Brand)
+				assert.Equal(t, product.Description, item.Description)
+				assert.Equal(t, product.Price, item.Price)
+				assert.Equal(t, product.CountInStock, item.CountInStock)
+				assert.Equal(t, product.CreatedAt.Unix(), item.CreatedAt.Unix())
+				assert.Equal(t, product.UpdatedAt.Unix(), item.UpdatedAt.Unix())
+				break
+			}
+		}
+		assert.True(t, found)
 	})
 
 	t.Run("Delete", func(t *testing.T) {

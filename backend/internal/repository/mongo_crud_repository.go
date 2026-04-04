@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"reflect"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,24 +20,32 @@ func NewMongoCRUDRepository[T any, ID comparable](db *mongo.Database, collection
 }
 
 func (r *mongoCRUDRepository[T, ID]) Create(ctx context.Context, entity *T, opts ...OneOpts) error {
+	BeforeCreate[ID](entity)
 	res, err := r.collection.InsertOne(ctx, entity)
 	if err != nil {
 		return err
 	}
-	// If the entity doesn't have an ID set, populate it from the InsertOneResult
-	if r.getID(entity) == nil || r.isZeroValue(r.getID(entity)) {
-		r.setID(entity, res.InsertedID)
+	if res.InsertedID != nil {
+		setID(entity, res.InsertedID)
 	}
 	return nil
 }
 
 func (r *mongoCRUDRepository[T, ID]) Update(ctx context.Context, entity *T, opts ...OneOpts) error {
-	id := r.getID(entity)
+	BeforeUpdate[ID](entity)
+	id := getID(entity)
+	if id == nil {
+		return fmt.Errorf("cannot update entity without ID")
+	}
 	filter := bson.M{"_id": id}
-	// ReplaceOne is often cleaner than UpdateOne with $set for whole entities
-	// as it avoids issues with updating the _id field if it's in the struct.
-	_, err := r.collection.ReplaceOne(ctx, filter, entity)
-	return err
+	res, err := r.collection.ReplaceOne(ctx, filter, entity)
+	if err != nil {
+		return err
+	}
+	if res.MatchedCount == 0 {
+		return fmt.Errorf("no document found with ID %v (filter: %v)", id, filter)
+	}
+	return nil
 }
 
 func (r *mongoCRUDRepository[T, ID]) UpdateOne(ctx context.Context, filter any, update any, opts ...OneOpts) error {
@@ -51,7 +59,10 @@ func (r *mongoCRUDRepository[T, ID]) UpdateMany(ctx context.Context, filter any,
 }
 
 func (r *mongoCRUDRepository[T, ID]) Save(ctx context.Context, entity *T, opts ...OneOpts) error {
-	id := r.getID(entity)
+	id := getID(entity)
+	if id == nil {
+		return r.Create(ctx, entity, opts...)
+	}
 	filter := bson.M{"_id": id}
 	upsert := true
 	_, err := r.collection.ReplaceOne(ctx, filter, entity, &options.ReplaceOptions{Upsert: &upsert})
@@ -216,73 +227,4 @@ func (r *mongoCRUDRepository[T, ID]) FindPage(ctx context.Context, filter any, o
 		Size:       size,
 		TotalPages: totalPages,
 	}, nil
-}
-
-// getID is a helper to extract the ID from the entity using reflection.
-func (r *mongoCRUDRepository[T, ID]) getID(entity *T) any {
-	val := reflect.ValueOf(entity)
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-
-	if val.Kind() != reflect.Struct {
-		return nil
-	}
-
-	// Try to find field with bson:"_id" tag first
-	typ := val.Type()
-	for i := 0; i < val.NumField(); i++ {
-		field := typ.Field(i)
-		tag := field.Tag.Get("bson")
-		if tag == "_id" || tag == "_id,omitempty" {
-			return val.Field(i).Interface()
-		}
-	}
-
-	// Fallback to field named "ID"
-	idField := val.FieldByName("ID")
-	if idField.IsValid() {
-		return idField.Interface()
-	}
-
-	return nil
-}
-
-// setID is a helper to set the ID of the entity using reflection.
-func (r *mongoCRUDRepository[T, ID]) setID(entity *T, id any) {
-	val := reflect.ValueOf(entity)
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
-	}
-
-	if val.Kind() != reflect.Struct {
-		return
-	}
-
-	// Try to find field with bson:"_id" tag first
-	typ := val.Type()
-	for i := 0; i < val.NumField(); i++ {
-		field := typ.Field(i)
-		tag := field.Tag.Get("bson")
-		if tag == "_id" || tag == "_id,omitempty" {
-			targetField := val.Field(i)
-			if targetField.CanSet() {
-				targetField.Set(reflect.ValueOf(id))
-			}
-			return
-		}
-	}
-
-	// Fallback to field named "ID"
-	idField := val.FieldByName("ID")
-	if idField.IsValid() && idField.CanSet() {
-		idField.Set(reflect.ValueOf(id))
-	}
-}
-
-func (r *mongoCRUDRepository[T, ID]) isZeroValue(v any) bool {
-	if v == nil {
-		return true
-	}
-	return reflect.ValueOf(v).IsZero()
 }

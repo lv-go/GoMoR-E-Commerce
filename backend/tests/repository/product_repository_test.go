@@ -2,7 +2,6 @@ package repository
 
 import (
 	"testing"
-	"time"
 
 	"gomor-e-commerce/internal/models"
 
@@ -29,8 +28,6 @@ func TestProductRepository(t *testing.T) {
 		Description:  "Test Description",
 		Price:        99.99,
 		CountInStock: 5,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
 	}
 
 	// Test Create
@@ -43,7 +40,7 @@ func TestProductRepository(t *testing.T) {
 	// Test FindById
 	var foundProduct *models.Product
 	t.Run("FindById", func(t *testing.T) {
-		foundProduct, err = repo.FindById(t.Context(), product.ID)
+		foundProduct, err = repo.FindById(t.Context(), *product.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, product.Name, foundProduct.Name)
 		assert.Equal(t, product.Price, foundProduct.Price)
@@ -58,20 +55,20 @@ func TestProductRepository(t *testing.T) {
 
 	// Test FindById after update
 	t.Run("FindByIdAfterUpdate", func(t *testing.T) {
-		foundProduct, err = repo.FindById(t.Context(), product.ID)
+		foundProduct, err = repo.FindById(t.Context(), *product.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, "Updated Product", foundProduct.Name)
 	})
 
 	// Test Delete
 	t.Run("Delete", func(t *testing.T) {
-		err = repo.Delete(t.Context(), product.ID)
+		err = repo.Delete(t.Context(), *product.ID)
 		assert.NoError(t, err)
 	})
 
 	// Test FindById after delete
 	t.Run("FindByIdAfterDelete", func(t *testing.T) {
-		foundProduct, err = repo.FindById(t.Context(), product.ID)
+		foundProduct, err = repo.FindById(t.Context(), *product.ID)
 		assert.Error(t, err)
 		assert.Nil(t, foundProduct)
 	})

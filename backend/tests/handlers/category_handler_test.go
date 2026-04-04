@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -44,7 +45,11 @@ func TestCategoryHandler(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, category.Name, createdCategory.Name)
 		assert.NotNil(t, createdCategory.ID)
+		assert.NotNil(t, createdCategory.UpdatedAt)
+		assert.NotNil(t, createdCategory.CreatedAt)
 		category.ID = createdCategory.ID
+		category.UpdatedAt = createdCategory.UpdatedAt
+		category.CreatedAt = createdCategory.CreatedAt
 	})
 
 	t.Run("FindById", func(t *testing.T) {
@@ -86,7 +91,19 @@ func TestCategoryHandler(t *testing.T) {
 		assert.LessOrEqual(t, int32(1), page.Size)
 		assert.LessOrEqual(t, int32(1), page.TotalPages)
 		assert.LessOrEqual(t, 1, len(page.Items))
-		assert.Contains(t, page.Items, *category)
+		found := false
+		for _, item := range page.Items {
+			slog.Info("FindPage:", "item", item)
+			if item.ID != nil && category.ID != nil && item.ID.Hex() == category.ID.Hex() {
+				found = true
+				assert.Equal(t, category.Name, item.Name)
+				assert.Equal(t, category.ID, item.ID)
+				assert.Equal(t, category.UpdatedAt.Unix(), item.UpdatedAt.Unix())
+				assert.Equal(t, category.CreatedAt.Unix(), item.CreatedAt.Unix())
+				break
+			}
+		}
+		assert.True(t, found)
 	})
 
 	t.Run("Delete", func(t *testing.T) {

@@ -16,7 +16,7 @@ func Setup(ctx context.Context) http.Handler {
 	db := ConnectDB(ctx)
 
 	// Create repositories
-	userRepo := repository.NewMongoCRUDRepository[models.User, primitive.ObjectID](db, "users")
+	userRepo := repository.NewMongoCRUDRepository[models.User, string](db, "users")
 	productRepo := repository.NewMongoCRUDRepository[models.Product, primitive.ObjectID](db, "products")
 	categoryRepo := repository.NewMongoCRUDRepository[models.Category, primitive.ObjectID](db, "categories")
 	orderRepo := repository.NewMongoCRUDRepository[models.Order, primitive.ObjectID](db, "orders")

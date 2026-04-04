@@ -44,8 +44,6 @@ func TestOrderRepository(t *testing.T) {
 		TotalPrice:    114.99,
 		IsPaid:        false,
 		IsDelivered:   false,
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
 	}
 
 	// Test Create
@@ -58,7 +56,7 @@ func TestOrderRepository(t *testing.T) {
 	// Test FindById
 	var foundOrder *models.Order
 	t.Run("FindById", func(t *testing.T) {
-		foundOrder, err = repo.FindById(t.Context(), order.ID)
+		foundOrder, err = repo.FindById(t.Context(), *order.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, order.TotalPrice, foundOrder.TotalPrice)
 		assert.Equal(t, order.PaymentMethod, foundOrder.PaymentMethod)
@@ -74,20 +72,20 @@ func TestOrderRepository(t *testing.T) {
 
 	// Test FindById after update
 	t.Run("FindByIdAfterUpdate", func(t *testing.T) {
-		foundOrder, err = repo.FindById(t.Context(), order.ID)
+		foundOrder, err = repo.FindById(t.Context(), *order.ID)
 		assert.NoError(t, err)
 		assert.True(t, foundOrder.IsPaid)
 	})
 
 	// Test Delete
 	t.Run("Delete", func(t *testing.T) {
-		err = repo.Delete(t.Context(), order.ID)
+		err = repo.Delete(t.Context(), *order.ID)
 		assert.NoError(t, err)
 	})
 
 	// Test FindById after delete
 	t.Run("FindByIdAfterDelete", func(t *testing.T) {
-		foundOrder, err = repo.FindById(t.Context(), order.ID)
+		foundOrder, err = repo.FindById(t.Context(), *order.ID)
 		assert.Error(t, err)
 		assert.Nil(t, foundOrder)
 	})

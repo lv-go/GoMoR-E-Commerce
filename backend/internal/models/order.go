@@ -1,17 +1,18 @@
 package models
 
 import (
+	"gomor-e-commerce/internal/repository"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type OrderItem struct {
+	Product primitive.ObjectID `json:"product" bson:"product"`
 	Name    string             `json:"name" bson:"name"`
 	Qty     int                `json:"qty" bson:"qty"`
 	Image   string             `json:"image" bson:"image"`
 	Price   float64            `json:"price" bson:"price"`
-	Product primitive.ObjectID `json:"product" bson:"product"`
 }
 
 type ShippingAddress struct {
@@ -29,20 +30,19 @@ type PaymentResult struct {
 }
 
 type Order struct {
-	ID              primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	User            primitive.ObjectID `json:"user" bson:"user"`
-	OrderItems      []OrderItem        `json:"orderItems" bson:"orderItems"`
-	ShippingAddress ShippingAddress    `json:"shippingAddress" bson:"shippingAddress"`
-	PaymentMethod   string             `json:"paymentMethod" bson:"paymentMethod"`
-	PaymentResult   PaymentResult      `json:"paymentResult" bson:"paymentResult"`
-	ItemsPrice      float64            `json:"itemsPrice" bson:"itemsPrice"`
-	TaxPrice        float64            `json:"taxPrice" bson:"taxPrice"`
-	ShippingPrice   float64            `json:"shippingPrice" bson:"shippingPrice"`
-	TotalPrice      float64            `json:"totalPrice" bson:"totalPrice"`
-	IsPaid          bool               `json:"isPaid" bson:"isPaid"`
-	PaidAt          time.Time          `json:"paidAt" bson:"paidAt"`
-	IsDelivered     bool               `json:"isDelivered" bson:"isDelivered"`
-	DeliveredAt     time.Time          `json:"deliveredAt" bson:"deliveredAt"`
-	CreatedAt       time.Time          `json:"createdAt" bson:"createdAt"`
-	UpdatedAt       time.Time          `json:"updatedAt" bson:"updatedAt"`
+	repository.Auditable
+	ID              *primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	User            primitive.ObjectID  `json:"user" bson:"user"`
+	OrderItems      []OrderItem         `json:"orderItems" bson:"orderItems"`
+	ShippingAddress ShippingAddress     `json:"shippingAddress" bson:"shippingAddress"`
+	PaymentMethod   string              `json:"paymentMethod" bson:"paymentMethod"`
+	PaymentResult   PaymentResult       `json:"paymentResult" bson:"paymentResult"`
+	ItemsPrice      float64             `json:"itemsPrice" bson:"itemsPrice"`
+	TaxPrice        float64             `json:"taxPrice" bson:"taxPrice"`
+	ShippingPrice   float64             `json:"shippingPrice" bson:"shippingPrice"`
+	TotalPrice      float64             `json:"totalPrice" bson:"totalPrice"`
+	IsPaid          bool                `json:"isPaid" bson:"isPaid"`
+	PaidAt          time.Time           `json:"paidAt" bson:"paidAt"`
+	IsDelivered     bool                `json:"isDelivered" bson:"isDelivered"`
+	DeliveredAt     time.Time           `json:"deliveredAt" bson:"deliveredAt"`
 }

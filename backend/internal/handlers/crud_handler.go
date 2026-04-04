@@ -40,8 +40,11 @@ func (h *CRUDHandler[T, ID]) parseID(r *http.Request) (*ID, error) {
 	default:
 		idValue, err = nil, errors.New("invalid id type")
 	}
-
-	return new(idValue.(ID)), err
+	if err != nil {
+		return nil, err
+	}
+	typedID := idValue.(ID)
+	return &typedID, nil
 }
 
 func (h *CRUDHandler[T, ID]) Create(w http.ResponseWriter, r *http.Request) {

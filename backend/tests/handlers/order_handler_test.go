@@ -49,7 +49,13 @@ func TestOrderHandler(t *testing.T) {
 		assert.Equal(t, order.PaymentMethod, createdOrder.PaymentMethod)
 		assert.Equal(t, order.TotalPrice, createdOrder.TotalPrice)
 		assert.NotNil(t, createdOrder.ID)
+		assert.NotEqual(t, primitive.NilObjectID, createdOrder.ID)
+		assert.NotNil(t, createdOrder.CreatedAt)
+		assert.NotNil(t, createdOrder.UpdatedAt)
+
 		order.ID = createdOrder.ID
+		order.CreatedAt = createdOrder.CreatedAt
+		order.UpdatedAt = createdOrder.UpdatedAt
 	})
 
 	t.Run("FindById", func(t *testing.T) {
@@ -91,7 +97,23 @@ func TestOrderHandler(t *testing.T) {
 		assert.LessOrEqual(t, int32(1), page.Size)
 		assert.LessOrEqual(t, int32(1), page.TotalPages)
 		assert.LessOrEqual(t, 1, len(page.Items))
-		assert.Contains(t, page.Items, *order)
+		found := false
+		for _, item := range page.Items {
+			if item.ID != nil && item.ID.Hex() == order.ID.Hex() {
+				found = true
+				assert.Equal(t, order.PaymentMethod, item.PaymentMethod)
+				assert.Equal(t, order.TotalPrice, item.TotalPrice)
+				assert.Equal(t, order.TaxPrice, item.TaxPrice)
+				assert.Equal(t, order.ShippingPrice, item.ShippingPrice)
+				assert.Equal(t, order.ItemsPrice, item.ItemsPrice)
+				assert.Equal(t, order.IsPaid, item.IsPaid)
+				assert.Equal(t, order.IsDelivered, item.IsDelivered)
+				assert.Equal(t, order.CreatedAt.Unix(), item.CreatedAt.Unix())
+				assert.Equal(t, order.UpdatedAt.Unix(), item.UpdatedAt.Unix())
+				break
+			}
+		}
+		assert.True(t, found)
 	})
 
 	t.Run("Delete", func(t *testing.T) {

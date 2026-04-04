@@ -2,7 +2,6 @@ package repository
 
 import (
 	"testing"
-	"time"
 
 	"gomor-e-commerce/internal/models"
 	"gomor-e-commerce/internal/repository"
@@ -18,14 +17,13 @@ func TestUserRepository(t *testing.T) {
 	repo := repository.NewMongoCRUDRepository[models.User, string](DB, "users")
 
 	// Test data
+	id := "user-" + faker.RandomString(10)
 	user := &models.User{
-		ID:        "user-" + faker.RandomString(10),
-		Name:      faker.Name().FirstName() + faker.Name().LastName(),
-		Email:     faker.Internet().Email(),
-		IsActive:  false,
-		Role:      "user",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:       id,
+		Name:     faker.Name().FirstName() + faker.Name().LastName(),
+		Email:    faker.Internet().Email(),
+		IsActive: false,
+		Role:     "user",
 	}
 
 	// Test Create
