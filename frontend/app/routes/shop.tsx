@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useGetFilteredProductsQuery } from "~/redux/api/productApiSlice";
-import { useFetchCategoriesQuery } from "~/redux/api/categoryApiSlice";
+import { useState } from "react";
 
-import {
-  setCategories,
-  setProducts,
-  setChecked,
-} from "~/redux/features/shop/shopSlice";
 import Loader from "~/components/Loader";
 import ProductCard from "~/components/Products/ProductCard";
+import { useGetPage } from "~/hooks/categories";
+import { useGetPage as useGetProductsPage } from "~/hooks/products";
 import type { Route } from "./+types/shop";
 
 export function meta({ }: Route.MetaArgs) {
@@ -20,70 +14,44 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export default function Shop() {
-  const dispatch = useDispatch();
-  const { categories, products, checked, radio } = useSelector(
-    (state) => state.shop
-  );
+  const { data: categoriesPage, isLoading: isLoadingCategories } = useGetPage();
+  const categories = categoriesPage?.items || [];
 
-  const categoriesQuery = useFetchCategoriesQuery();
+  const [categoriesChecked, setCategoriesChecked] = useState<string[]>([]);
+  const [brandChecked, setBrandChecked] = useState<string>("");
   const [priceFilter, setPriceFilter] = useState("");
 
-  const filteredProductsQuery = useGetFilteredProductsQuery({
-    checked,
-    radio,
+  const { data: productsPage, isLoading: isLoadingProducts } = useGetProductsPage({
+    category: categoriesChecked.join(","),
+    brand: brandChecked,
+    price: priceFilter,
   });
 
-  useEffect(() => {
-    if (!categoriesQuery.isLoading) {
-      dispatch(setCategories(categoriesQuery.data));
-    }
-  }, [categoriesQuery.data, dispatch]);
+  const products = productsPage?.items || [];
 
-  useEffect(() => {
-    if (!checked.length || !radio.length) {
-      if (!filteredProductsQuery.isLoading) {
-        // Filter products based on both checked categories and price filter
-        const filteredProducts = filteredProductsQuery.data.filter(
-          (product) => {
-            // Check if the product price includes the entered price filter value
-            return (
-              product.price.toString().includes(priceFilter) ||
-              product.price === parseInt(priceFilter, 10)
-            );
-          }
-        );
-
-        dispatch(setProducts(filteredProducts));
-      }
-    }
-  }, [checked, radio, filteredProductsQuery.data, dispatch, priceFilter]);
-
-  const handleBrandClick = (brand) => {
-    const productsByBrand = filteredProductsQuery.data?.filter(
-      (product) => product.brand === brand
-    );
-    dispatch(setProducts(productsByBrand));
+  const handleBrandClick = (brand: string) => {
+    setBrandChecked(brand);
   };
 
-  const handleCheck = (value, id) => {
+  const handleCheck = (value: boolean, id: string) => {
     const updatedChecked = value
-      ? [...checked, id]
-      : checked.filter((c) => c !== id);
-    dispatch(setChecked(updatedChecked));
+      ? [...categoriesChecked, id]
+      : categoriesChecked.filter((c) => c !== id);
+    setCategoriesChecked(updatedChecked);
   };
 
   // Add "All Brands" option to uniqueBrands
   const uniqueBrands = [
     ...Array.from(
       new Set(
-        filteredProductsQuery.data
+        products
           ?.map((product) => product.brand)
           .filter((brand) => brand !== undefined)
       )
     ),
   ];
 
-  const handlePriceChange = (e) => {
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Update the price filter state when the user types in the input filed
     setPriceFilter(e.target.value);
   };
@@ -104,7 +72,7 @@ export default function Shop() {
                     <input
                       type="checkbox"
                       id="red-checkbox"
-                      onChange={(e) => handleCheck(e.target.checked, c._id)}
+                      onChange={(e) => handleCheck(e.target.checked, c._id || "")}
                       className="w-4 h-4 text-pink-600 bg-gray-100 border-gray-300 rounded focus:ring-pink-500 dark:focus:ring-pink-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                     />
 

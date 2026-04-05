@@ -9,4 +9,7 @@ export interface Page<T> {
 export interface PageRequest {
   offset?: number;
   limit?: number;
+  sort?: string;
+  order?: "asc" | "desc";
+  search?: string;
 }

@@ -1,4 +1,4 @@
-const Modal = ({ isOpen, onClose, children }) => {
+export default function Modal({ isOpen, onClose, children }: { isOpen: boolean; onClose: () => void; children: React.ReactNode }) {
   return (
     <>
       {isOpen && (
@@ -17,6 +17,4 @@ const Modal = ({ isOpen, onClose, children }) => {
       )}
     </>
   );
-};
-
-export default Modal;
+}

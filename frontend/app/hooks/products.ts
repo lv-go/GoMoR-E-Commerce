@@ -1,12 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchWithAuth } from "../utils/api";
-import { type Product } from "../schemas/product";
+import { type Product, type ProductFilters } from "../schemas/product";
 import { type Page, type PageRequest } from "../schemas/api";
 
-export function useGetPage({ offset, limit }: PageRequest) {
+export function useGetTopProducts() {
+  return useGetPage({ offset: 0, limit: 10, sort: "rating", order: "desc" });
+}
+
+export function useGetPage({ offset, limit, sort, order, search, category, price }: PageRequest & ProductFilters) {
+  const params = new URLSearchParams();
+  if (offset) params.set("offset", offset.toString());
+  if (limit) params.set("limit", limit.toString());
+  if (sort) params.set("sort", sort);
+  if (order) params.set("order", order);
+  if (search) params.set("search", search);
+  if (category) params.set("category", category);
+  if (price) params.set("price", price);
+
   return useQuery<Page<Product>>({
-    queryKey: ["products", "page", { offset, limit }],
-    queryFn: () => fetchWithAuth(`/products?offset=${offset}&limit=${limit}`),
+    queryKey: ["products", "page", { offset, limit, sort, order, search, category, price }],
+    queryFn: () => fetchWithAuth(`/products?${params.toString()}`),
   });
 }
 

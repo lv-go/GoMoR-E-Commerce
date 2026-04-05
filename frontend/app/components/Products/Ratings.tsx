@@ -6,8 +6,8 @@ const Ratings = ({
   color
 }: {
   value: number;
-  text: string;
-  color: string
+  text?: string;
+  color?: string
 }) => {
   const fullStars = Math.floor(value);
   const halfStars = value - fullStars > 0.5 ? 1 : 0;

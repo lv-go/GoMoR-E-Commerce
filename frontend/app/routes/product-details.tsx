@@ -5,9 +5,9 @@ import { toast } from "react-toastify";
 import {
   useGetProductDetailsQuery,
   useCreateReviewMutation,
-} from "../../redux/api/productApiSlice";
-import Loader from "../../components/Loader";
-import Message from "../../components/Message";
+} from "../redux/api/productApiSlice";
+import Loader from "../components/Loader";
+import Message from "../components/Message";
 import {
   FaBox,
   FaClock,
@@ -16,12 +16,28 @@ import {
   FaStore,
 } from "react-icons/fa";
 import moment from "moment";
-import HeartIcon from "./HeartIcon";
-import Ratings from "./Ratings";
-import ProductTabs from "./ProductTabs";
-import { addToCart } from "../../redux/features/cart/cartSlice";
+import HeartIcon from "../components/Products/HeartIcon";
+import Ratings from "../components/Products/Ratings";
+import ProductTabs from "../components/Products/ProductTabs";
+import { addToCart } from "../redux/features/cart/cartSlice";
+import type { Route } from "./+types/product-details";
+import { useGetById } from "~/hooks/products";
+import { useFirebaseAuth } from "~/FirebaseAuthContext";
+import { newProduct } from "~/schemas/product";
 
-const ProductDetails = () => {
+
+export function meta({ }: Route.MetaArgs) {
+  return [
+    { title: "GoMoR-E-Commerce" },
+    { name: "description", content: "Welcome to GoMoR-E-Commerce!" },
+  ];
+}
+
+export async function clientLoader({ params }: Route.LoaderArgs) {
+  return params.id;
+}
+
+export default function ProductDetails() {
   const { id: productId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -30,19 +46,14 @@ const ProductDetails = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  const {
-    data: product,
-    isLoading,
-    refetch,
-    error,
-  } = useGetProductDetailsQuery(productId);
+  const { data: product = newProduct(), isLoading, refetch, error } = useGetById(productId || "");
 
-  const { userInfo } = useSelector((state) => state.auth);
+  const { user: userInfo } = useFirebaseAuth();
 
   const [createReview, { isLoading: loadingProductReview }] =
     useCreateReviewMutation();
 
-  const submitHandler = async (e) => {
+  const submitHandler = async (e: SubmitEvent) => {
     e.preventDefault();
 
     try {
@@ -53,8 +64,8 @@ const ProductDetails = () => {
       }).unwrap();
       refetch();
       toast.success("Review created successfully");
-    } catch (error) {
-      toast.error(error?.data || error.message);
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -78,7 +89,7 @@ const ProductDetails = () => {
         <Loader />
       ) : error ? (
         <Message variant="danger">
-          {error?.data?.message || error.message}
+          {error.message}
         </Message>
       ) : (
         <>
@@ -109,7 +120,7 @@ const ProductDetails = () => {
                   </h1>
                   <h1 className="flex items-center mb-6 w-[20rem]">
                     <FaClock className="mr-2 text-white" /> Added:{" "}
-                    {moment(product.createAt).fromNow()}
+                    {moment(product.createdAt).fromNow()}
                   </h1>
                   <h1 className="flex items-center mb-6">
                     <FaStar className="mr-2 text-white" /> Reviews:{" "}
@@ -142,7 +153,7 @@ const ProductDetails = () => {
                   <div>
                     <select
                       value={qty}
-                      onChange={(e) => setQty(e.target.value)}
+                      onChange={(e) => setQty(Number(e.target.value))}
                       className="p-2 w-[6rem] rounded-lg text-black"
                     >
                       {[...Array(product.countInStock).keys()].map((x) => (
@@ -183,6 +194,4 @@ const ProductDetails = () => {
       )}
     </>
   );
-};
-
-export default ProductDetails;
+}

@@ -11,9 +11,11 @@ import {
   FaStar,
   FaStore,
 } from "react-icons/fa";
+import { useGetTopProducts } from "~/hooks/products";
 
 const ProductCarousel = () => {
-  const { data: { items: products = [] }, isLoading, error } = useGetTopProductsQuery();
+  const { data, isLoading, error } = useGetTopProducts();
+  const products = data?.items || [];
 
   const settings = {
     dots: false,
@@ -30,7 +32,7 @@ const ProductCarousel = () => {
     <div className="mb-4 lg:block xl:block md:block">
       {isLoading ? null : error ? (
         <Message variant="danger">
-          {error?.data?.message || error.error}
+          {error.message}
         </Message>
       ) : (
         <Slider

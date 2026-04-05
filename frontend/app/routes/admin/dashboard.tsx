@@ -1,23 +1,19 @@
-import Chart from "react-apexcharts";
-import { useGetUsersQuery } from "~/redux/api/usersApiSlice";
-import {
-  useGetTotalOrdersQuery,
-  useGetTotalSalesByDateQuery,
-  useGetTotalSalesQuery,
-} from "~/redux/api/orderApiSlice";
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import Chart, { type Props } from "react-apexcharts";
+import { useGetTotalOrdersQuery, useGetTotalSalesByDateQuery, useGetTotalSalesQuery } from "~/hooks/orders";
+import { useGetPage } from "~/hooks/users";
 import AdminMenu from "../../components/Admin/AdminMenu";
-import OrderList from "./orders";
 import Loader from "../../components/Loader";
+import OrderList from "./orders";
 
 export default function Dashboard() {
   const { data: sales, isLoading } = useGetTotalSalesQuery();
-  const { data: customers, isLoading: loading } = useGetUsersQuery();
+  const { data, isLoading: loading } = useGetPage();
+  const customers = data?.items || [];
   const { data: orders, isLoading: loadingTwo } = useGetTotalOrdersQuery();
   const { data: salesDetail } = useGetTotalSalesByDateQuery();
 
-  const [state, setState] = useState({
+  const [state, setState] = useState<Props>({
     options: {
       chart: {
         type: "line",
@@ -101,7 +97,7 @@ export default function Dashboard() {
 
             <p className="mt-5">Sales</p>
             <h1 className="text-xl font-bold">
-              $ {isLoading ? <Loader /> : sales.totalSales.toFixed(2)}
+              $ {isLoading ? <Loader /> : sales?.toFixed(2)}
             </h1>
           </div>
           <div className="rounded-lg bg-black p-5 w-[20rem] mt-5">
@@ -121,7 +117,7 @@ export default function Dashboard() {
 
             <p className="mt-5">All Orders</p>
             <h1 className="text-xl font-bold">
-              $ {isLoading ? <Loader /> : orders?.totalOrders}
+              $ {isLoading ? <Loader /> : orders}
             </h1>
           </div>
         </div>

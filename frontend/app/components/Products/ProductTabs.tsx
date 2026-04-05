@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import Ratings from "./Ratings";
-import { useGetTopProductsQuery } from "~/redux/api/productApiSlice";
-import SmallProduct from "./SmallProduct";
 import Loader from "~/components/Loader";
+import { useGetTopProducts } from "~/hooks/products";
+import SmallProduct from "./SmallProduct";
 
 const ProductTabs = ({
   loadingProductReview,
@@ -14,8 +14,18 @@ const ProductTabs = ({
   comment,
   setComment,
   product,
+}: {
+  loadingProductReview: boolean;
+  userInfo: any;
+  submitHandler: (e: SubmitEvent) => void;
+  rating: number;
+  setRating: (rating: number) => void;
+  comment: string;
+  setComment: (comment: string) => void;
+  product: any;
 }) => {
-  const { data, isLoading } = useGetTopProductsQuery();
+  const { data, isLoading } = useGetTopProducts();
+  const products = data?.items || [];
 
   const [activeTab, setActiveTab] = useState(1);
 
@@ -23,7 +33,7 @@ const ProductTabs = ({
     return <Loader />;
   }
 
-  const handleTabClick = (tabNumber) => {
+  const handleTabClick = (tabNumber: number) => {
     setActiveTab(tabNumber);
   };
 
@@ -87,7 +97,7 @@ const ProductTabs = ({
 
                   <textarea
                     id="comment"
-                    rows="3"
+                    rows={3}
                     required
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
@@ -117,7 +127,7 @@ const ProductTabs = ({
             <div>{product.reviews.length === 0 && <p>No Reviews</p>}</div>
 
             <div>
-              {product.reviews.map((review) => (
+              {product.reviews.map((review: any) => (
                 <div
                   key={review._id}
                   className="bg-[#1A1A1A] p-4 rounded-lg xl:ml-[2rem] sm:ml-[0rem] xl:w-[50rem] sm:w-[24rem] mb-5"
@@ -144,7 +154,7 @@ const ProductTabs = ({
             {!data ? (
               <Loader />
             ) : (
-              data.map((product) => (
+              products.map((product) => (
                 <div key={product._id}>
                   <SmallProduct product={product} />
                 </div>

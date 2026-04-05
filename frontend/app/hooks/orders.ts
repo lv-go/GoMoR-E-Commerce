@@ -62,3 +62,25 @@ export function useDeleteById() {
     },
   });
 }
+
+
+export function useGetTotalOrdersQuery() {
+  return useQuery<number>({
+    queryKey: ["orders", "total"],
+    queryFn: () => fetchWithAuth("/orders/total"),
+  });
+}
+
+export function useGetTotalSalesQuery() {
+  return useQuery<number>({
+    queryKey: ["orders", "total-sales"],
+    queryFn: () => fetchWithAuth("/orders/total-sales"),
+  });
+}
+
+export function useGetTotalSalesByDateQuery() {
+  return useQuery<{ _id: string; totalSales: number }[]>({
+    queryKey: ["orders", "total-sales-by-date"],
+    queryFn: () => fetchWithAuth("/orders/total-sales-by-date"),
+  });
+}

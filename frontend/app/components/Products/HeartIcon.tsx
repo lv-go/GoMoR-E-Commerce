@@ -12,11 +12,13 @@ import {
   getFavoritesFromLocalStorage,
   removeFavoriteFromLocalStorage,
 } from "../../utils/localStorage";
+import { type Product } from "~/schemas/product";
 
-const HeartIcon = ({ product }) => {
+const HeartIcon = ({ product }: { product: Product }) => {
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites) || [];
-  const isFavorite = favorites.some((p) => p._id === product._id);
+  const isFavorite = favorites.some((p: Product) => p._id === product._id);
+
 
   useEffect(() => {
     const favoritesFromLocalStorage = getFavoritesFromLocalStorage();

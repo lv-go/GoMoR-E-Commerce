@@ -11,10 +11,9 @@ import { useSelector } from "react-redux";
 import { Link, NavLink, useNavigate } from "react-router";
 import { useFirebaseAuth } from "~/FirebaseAuthContext";
 import { auth } from "~/firebase-config";
-// import "./Navigation.css";
 import FavoritesCount from "./Products/FavoritesCount";
 
-const Navigation = () => {
+export default function Navigation() {
   const { user } = useFirebaseAuth();
   const { cartItems } = useSelector((state: any) => state.cart);
 
@@ -66,7 +65,7 @@ const Navigation = () => {
           <AiOutlineShoppingCart className="my-1.5 inline-block size-4" />
           <span className="is-drawer-close:hidden">Cart</span>
 
-          <div className="absolute top-9">
+          <div className="absolute top-0 right-1">
             {cartItems.length > 0 && (
               <span>
                 <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
@@ -80,11 +79,11 @@ const Navigation = () => {
 
       <li>
         <Link to="/favorites" data-tip="Favorites" className="is-drawer-close:tooltip is-drawer-close:tooltip-right">
-          <FaHeart className="my-1.5 inline-block size-4" />
+          <div className="my-1.5 inline-block size-4">
+            <FaHeart />
+          </div>
           <span className="is-drawer-close:hidden">Favorites</span>
-          {/* <div className="">
-            <FavoritesCount />
-          </div> */}
+          <FavoritesCount className="absolute top-0 right-1" />
         </Link>
       </li>
       {user && (
@@ -227,6 +226,4 @@ const Navigation = () => {
 
     </ul >
   );
-};
-
-export default Navigation;
+}

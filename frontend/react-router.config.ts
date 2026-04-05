@@ -7,6 +7,7 @@ export default {
   prerender: [
     "/",
     "/shop",
+    "/product/:id",
     "/cart",
     "/favorites",
     "/profile",

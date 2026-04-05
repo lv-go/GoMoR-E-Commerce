@@ -42,6 +42,14 @@ export const newProduct = (): Product => ({
   numReviews: 0,
   price: 0,
   countInStock: 0,
+  createdAt: "",
+  updatedAt: "",
 });
 
 export const getId = (item: Product) => item._id || "";
+
+export type ProductFilters = {
+  category?: string;
+  price?: string;
+  brand?: string;
+};

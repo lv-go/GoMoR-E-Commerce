@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { FaTrash } from "react-icons/fa";
 import { addToCart, removeFromCart } from "../redux/features/cart/cartSlice";
 import type { Route } from "./+types/cart";
+import type { Product } from "~/schemas/product";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -15,14 +16,14 @@ export default function Cart() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const cart = useSelector((state) => state.cart);
+  const cart = useSelector((state: any) => state.cart);
   const { cartItems } = cart;
 
-  const addToCartHandler = (product, qty) => {
+  const addToCartHandler = (product: Product, qty: number) => {
     dispatch(addToCart({ ...product, qty }));
   };
 
-  const removeFromCartHandler = (id) => {
+  const removeFromCartHandler = (id: string) => {
     dispatch(removeFromCart(id));
   };
 
@@ -32,7 +33,7 @@ export default function Cart() {
 
   return (
     <>
-      <div className="container flex justify-around items-start flex wrap mx-auto mt-8">
+      <div className="container flex justify-around items-start wrap mx-auto mt-8">
         {cartItems.length === 0 ? (
           <div>
             Your cart is empty <Link to="/shop">Go To Shop</Link>
@@ -42,8 +43,8 @@ export default function Cart() {
             <div className="flex flex-col w-[80%]">
               <h1 className="text-2xl font-semibold mb-4">Shopping Cart</h1>
 
-              {cartItems.map((item) => (
-                <div key={item._id} className="flex items-enter mb-[1rem] pb-2">
+              {cartItems.map((item: any) => (
+                <div key={item._id} className="flex items-center mb-[1rem] pb-2">
                   <div className="w-[5rem] h-[5rem]">
                     <img
                       src={item.image}
@@ -93,13 +94,13 @@ export default function Cart() {
               <div className="mt-8 w-[40rem]">
                 <div className="p-4 rounded-lg">
                   <h2 className="text-xl font-semibold mb-2">
-                    Items ({cartItems.reduce((acc, item) => acc + item.qty, 0)})
+                    Items ({cartItems.reduce((acc: number, item: any) => acc + item.qty, 0)})
                   </h2>
 
                   <div className="text-2xl font-bold">
                     ${" "}
                     {cartItems
-                      .reduce((acc, item) => acc + item.qty * item.price, 0)
+                      .reduce((acc: number, item: any) => acc + item.qty * item.price, 0)
                       .toFixed(2)}
                   </div>
 

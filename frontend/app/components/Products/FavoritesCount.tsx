@@ -1,11 +1,12 @@
 import { useSelector } from "react-redux";
 
-const FavoritesCount = () => {
-  const favorites = useSelector((state: any) => state.favorites);
-  const favoriteCount = favorites.length;
+export default function FavoritesCount({ className }: { className?: string }) {
+  // const favorites = useSelector((state: any) => state.favorites);
+  // const favoriteCount = favorites.length;
+  const favoriteCount = 5;
 
   return (
-    <div className="absolute left-2 top-8">
+    <div className={className}>
       {favoriteCount > 0 && (
         <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
           {favoriteCount}
@@ -13,6 +14,4 @@ const FavoritesCount = () => {
       )}
     </div>
   );
-};
-
-export default FavoritesCount;
+}

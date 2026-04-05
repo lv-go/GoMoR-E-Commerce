@@ -51,10 +51,6 @@ export default function AllProducts() {
       content: (item) => item.description,
       editor: (register) => <input className="input input-bordered" {...register} />,
     }, {
-      key: "reviews",
-      header: "Reviews",
-      content: (item) => item.reviews.length,
-    }, {
       key: "price",
       header: "Price",
       content: (item) => item.price,
@@ -66,13 +62,5 @@ export default function AllProducts() {
       content: (item) => item.countInStock,
       registerOptions: { min: 0, valueAsNumber: true },
       editor: (register) => <input type="number" className="input input-bordered" {...register} />,
-    }, {
-      key: "createdAt",
-      header: "Created At",
-      content: (item) => item.createdAt,
-    }, {
-      key: "updatedAt",
-      header: "Updated At",
-      content: (item) => item.updatedAt,
     },]} />
 }

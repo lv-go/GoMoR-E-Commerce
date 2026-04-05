@@ -4,11 +4,12 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/features/cart/cartSlice";
 import { toast } from "react-toastify";
 import HeartIcon from "./HeartIcon";
+import { type Product } from "~/schemas/product";
 
-const ProductCard = ({ p }) => {
+const ProductCard = ({ p }: { p: Product }) => {
   const dispatch = useDispatch();
 
-  const addToCartHandler = (product, qty) => {
+  const addToCartHandler = (product: Product, qty: number) => {
     dispatch(addToCart({ ...product, qty }));
     toast.success("Item added successfully", {
       position: toast.POSITION.TOP_RIGHT,
