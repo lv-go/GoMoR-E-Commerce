@@ -3,14 +3,14 @@ import { Link, useParams } from "react-router";
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import Messsage from "../Message";
-import Loader from "../Loader";
+import Messsage from "~/components/Message";
+import Loader from "~/components/Loader";
 import {
   useDeliverOrderMutation,
   useGetOrderDetailsQuery,
   useGetPaypalClientIdQuery,
   usePayOrderMutation,
-} from "../../redux/api/orderApiSlice";
+} from "~/redux/api/orderApiSlice";
 
 const Order = () => {
   const { id: orderId } = useParams();

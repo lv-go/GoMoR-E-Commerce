@@ -17,6 +17,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { FirebaseAuthProvider } from "./FirebaseAuthContext";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./utils/query-client";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 
 export const links: Route.LinksFunction = () => [
@@ -53,22 +54,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return <Provider store={store}>
     <QueryClientProvider client={queryClient}>
-      <FirebaseAuthProvider>
-        <ToastContainer />
-        <div className="drawer lg:drawer-open">
-          <input id="root-drawer" type="checkbox" className="drawer-toggle" />
-          <div className="drawer-content">
-            <Outlet />
-          </div>
+      <PayPalScriptProvider options={{ clientId: "test" }}>
+        <FirebaseAuthProvider>
+          <ToastContainer />
+          <div className="drawer lg:drawer-open">
+            <input id="root-drawer" type="checkbox" className="drawer-toggle" />
+            <div className="drawer-content">
+              <Outlet />
+            </div>
 
-          <div className="drawer-side is-drawer-close:overflow-visible">
-            <label htmlFor="root-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
-            <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
-              <Navigation />
+            <div className="drawer-side is-drawer-close:overflow-visible">
+              <label htmlFor="root-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
+              <div className="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-14 is-drawer-open:w-64">
+                <Navigation />
+              </div>
             </div>
           </div>
-        </div>
-      </FirebaseAuthProvider>
+        </FirebaseAuthProvider>
+      </PayPalScriptProvider>
     </QueryClientProvider>
   </Provider>;
 }

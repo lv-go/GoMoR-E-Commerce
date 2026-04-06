@@ -1,9 +1,15 @@
 import type { ReactNode } from "react";
 
-const Message = ({ variant, children }: { variant: string; children: ReactNode }) => {
+const Message = ({
+  variant = "info",
+  children,
+}: {
+  variant?: "success" | "error" | "info";
+  children: ReactNode;
+}) => {
   const getVariantClass = () => {
     switch (variant) {
-      case "succcess":
+      case "success":
         return "bg-green-100 text-green-800";
       case "error":
         return "bg-red-100 text-red-800";

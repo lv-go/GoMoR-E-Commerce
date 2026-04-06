@@ -2,18 +2,19 @@ import { useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
-import Message from "../Message";
-import ProgressSteps from "../ProgressSteps";
-import Loader from "../Loader";
+import Message from "../../components/Message";
+import ProgressSteps from "../../components/ProgressSteps";
+import Loader from "../../components/Loader";
 import { useCreateOrderMutation } from "../../redux/api/orderApiSlice";
 import { clearCartItems } from "../../redux/features/cart/cartSlice";
+import { useCreate } from "~/hooks/orders";
 
-const PlaceOrder = () => {
+export default function PlaceOrder() {
   const navigate = useNavigate();
 
-  const cart = useSelector((state) => state.cart);
+  const cart = useSelector((state: any) => state.cart);
 
-  const [createOrder, { isLoading, error }] = useCreateOrderMutation();
+  const { mutateAsync: createOrder, isPending: isLoading, error } = useCreate();
 
   useEffect(() => {
     if (!cart.shippingAddress.address) {
@@ -33,7 +34,7 @@ const PlaceOrder = () => {
         shippingPrice: cart.shippingPrice,
         taxPrice: cart.taxPrice,
         totalPrice: cart.totalPrice,
-      }).unwrap();
+      });
       dispatch(clearCartItems());
       navigate(`/order/${res._id}`);
     } catch (error) {
@@ -89,7 +90,7 @@ const PlaceOrder = () => {
 
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-5">Order Summary</h2>
-          <div className="flex justify-between flex-wrap p-8 bg-[#181818]">
+          <div className="flex justify-between flex-wrap p-8 bg-base-300">
             <ul className="text-lg">
               <li>
                 <span className="font-semibold mb-4">Items:</span> $
@@ -109,7 +110,7 @@ const PlaceOrder = () => {
               </li>
             </ul>
 
-            {error && <Message variant="danger">{error.data.message}</Message>}
+            {error && <Message variant="error">{error.message}</Message>}
 
             <div>
               <h2 className="text-2xl font-semibold mb-4">Shipping</h2>
@@ -140,6 +141,4 @@ const PlaceOrder = () => {
       </div>
     </>
   );
-};
-
-export default PlaceOrder;
+}

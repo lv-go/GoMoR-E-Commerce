@@ -104,13 +104,12 @@ export default function Cart() {
                       .toFixed(2)}
                   </div>
 
-                  <button
-                    className="bg-pink-500 mt-4 py-2 px-4 rounded-full text-lg w-full"
-                    disabled={cartItems.length === 0}
-                    onClick={checkoutHandler}
+                  <Link
+                    to="/shipping"
+                    className="btn btn-primary mt-4 rounded-full text-lg w-full"
                   >
                     Proceed To Checkout
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
