@@ -1,13 +1,5 @@
+import moment from "moment";
 import { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
-import {
-  useGetProductDetailsQuery,
-  useCreateReviewMutation,
-} from "../redux/api/productApiSlice";
-import Loader from "../components/Loader";
-import Message from "../components/Message";
 import {
   FaBox,
   FaClock,
@@ -15,20 +7,23 @@ import {
   FaStar,
   FaStore,
 } from "react-icons/fa";
-import moment from "moment";
-import HeartIcon from "../components/Products/HeartIcon";
-import Ratings from "../components/Products/Ratings";
-import ProductTabs from "../components/Products/ProductTabs";
-import { addToCart } from "../redux/features/cart/cartSlice";
-import type { Route } from "./+types/product-details";
-import { useGetById } from "~/hooks/products";
+import { Link, useNavigate, useParams } from "react-router";
+import { toast } from "react-toastify";
+import Loader from "~/components/Loader";
+import Message from "~/components/Message";
+import HeartIcon from "~/components/Products/HeartIcon";
+import ProductTabs from "~/components/Products/ProductTabs";
+import Ratings from "~/components/Products/Ratings";
 import { useFirebaseAuth } from "~/FirebaseAuthContext";
+import { useCreateReview, useGetById } from "~/hooks/products";
 import { newProduct } from "~/schemas/product";
+import { addCartItem } from "~/utils/cartUtils";
+import type { Route } from "./+types/product-details";
 
 
 export function meta({ }: Route.MetaArgs) {
   return [
-    { title: "GoMoR-E-Commerce" },
+    { title: "GoMoR-E-Commerce - Product Details" },
     { name: "description", content: "Welcome to GoMoR-E-Commerce!" },
   ];
 }
@@ -40,9 +35,8 @@ export async function clientLoader({ params }: Route.LoaderArgs) {
 export default function ProductDetails() {
   const { id: productId } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const [qty, setQty] = useState(1);
+  const [quantity, setQty] = useState(1);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
@@ -50,18 +44,17 @@ export default function ProductDetails() {
 
   const { user: userInfo } = useFirebaseAuth();
 
-  const [createReview, { isLoading: loadingProductReview }] =
-    useCreateReviewMutation();
+  const { mutateAsync: createReview, isPending: loadingProductReview } = useCreateReview();
 
   const submitHandler = async (e: SubmitEvent) => {
     e.preventDefault();
 
     try {
       await createReview({
-        productId,
+        productId: productId || "",
         rating,
         comment,
-      }).unwrap();
+      });
       refetch();
       toast.success("Review created successfully");
     } catch (error: any) {
@@ -70,7 +63,14 @@ export default function ProductDetails() {
   };
 
   const addToCartHandler = () => {
-    dispatch(addToCart({ ...product, qty }));
+    addCartItem({
+      _id: product._id as string,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      countInStock: product.countInStock,
+      quantity,
+    });
     navigate("/cart");
   };
 
@@ -88,7 +88,7 @@ export default function ProductDetails() {
       {isLoading ? (
         <Loader />
       ) : error ? (
-        <Message variant="danger">
+        <Message variant="error">
           {error.message}
         </Message>
       ) : (
@@ -152,7 +152,7 @@ export default function ProductDetails() {
                 {product.countInStock > 0 && (
                   <div>
                     <select
-                      value={qty}
+                      value={quantity}
                       onChange={(e) => setQty(Number(e.target.value))}
                       className="p-2 w-[6rem] rounded-lg text-black"
                     >

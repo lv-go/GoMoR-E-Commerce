@@ -1,31 +1,26 @@
+import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { useEffect } from "react";
 import { Link, useParams } from "react-router";
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
-import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import Messsage from "~/components/Message";
 import Loader from "~/components/Loader";
+import Messsage from "~/components/Message";
+import { useFirebaseAuth } from "~/FirebaseAuthContext";
 import {
+  useGetById,
   useDeliverOrderMutation,
-  useGetOrderDetailsQuery,
   useGetPaypalClientIdQuery,
   usePayOrderMutation,
-} from "~/redux/api/orderApiSlice";
+  newOrder
+} from "~/hooks/orders";
 
 const Order = () => {
   const { id: orderId } = useParams();
 
-  const {
-    data: order,
-    refetch,
-    isLoading,
-    error,
-  } = useGetOrderDetailsQuery(orderId);
+  const { data: order = newOrder(), refetch, isLoading, error } = useGetById(orderId || "");
 
-  const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
-  const [deliverOrder, { isLoading: loadingDeliver }] =
-    useDeliverOrderMutation();
-  const { userInfo } = useSelector((state) => state.auth);
+  const { mutate: payOrder, isPending: loadingPay } = usePayOrderMutation();
+  const { mutate: deliverOrder, isPending: loadingDeliver } = useDeliverOrderMutation();
+  const { user: userInfo } = useFirebaseAuth();
 
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
 
@@ -211,7 +206,7 @@ const Order = () => {
         )}
 
         {loadingDeliver && <Loader />}
-        {userInfo && userInfo.isAdmin && order.isPaid && !order.isDelivered && (
+        {userInfo && userInfo.role === "admin" && order.isPaid && !order.isDelivered && (
           <div>
             <button
               type="button"

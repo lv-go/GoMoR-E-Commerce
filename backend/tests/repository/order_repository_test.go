@@ -18,17 +18,17 @@ func TestOrderRepository(t *testing.T) {
 	repo := repository.NewMongoCRUDRepository[models.Order, primitive.ObjectID](DB, "orders")
 
 	// Test data
-	userID := primitive.NewObjectID()
+	userID := primitive.NewObjectID().Hex()
 	productID := primitive.NewObjectID()
 	order := &models.Order{
-		User: userID,
+		UserID: userID,
 		OrderItems: []models.OrderItem{
 			{
-				Name:    "Test Item",
-				Qty:     1,
-				Image:   "/images/test.jpg",
-				Price:   99.99,
-				Product: productID,
+				Name:      "Test Item",
+				Quantity:  1,
+				Image:     "https://picsum.photos/id/237/200/300",
+				Price:     99.99,
+				ProductID: productID,
 			},
 		},
 		ShippingAddress: models.ShippingAddress{

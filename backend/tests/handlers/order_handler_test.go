@@ -2,45 +2,108 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"gomor-e-commerce/internal/auth"
 	"gomor-e-commerce/internal/handlers"
 	"gomor-e-commerce/internal/models"
 	"gomor-e-commerce/internal/repository"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type MockAuthClient struct {
+	mock.Mock
+}
+
+func (m *MockAuthClient) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
+	args := m.Called(ctx, idToken)
+	if args.Get(0) != nil {
+		return args.Get(0).(*auth.Token), args.Error(1)
+	}
+	return nil, args.Error(1)
+}
+
 func TestOrderHandler(t *testing.T) {
+	authClient := new(MockAuthClient)
+	authMiddleware := auth.NewAuthMiddleware(authClient)
+	adminToken := &auth.Token{
+		UID: "user123",
+		Claims: map[string]interface{}{
+			"email":          "testadmin@example.com",
+			"username":       "testadmin",
+			"role":           "admin",
+			"email_verified": true,
+		},
+	}
+	userToken := &auth.Token{
+		UID: "user123",
+		Claims: map[string]interface{}{
+			"email":          "testuser@example.com",
+			"username":       "testuser",
+			"role":           "user",
+			"email_verified": true,
+		},
+	}
+
+	authClient.On("VerifyIDToken", mock.Anything, "admin-token").Return(adminToken, nil).Maybe()
+	authClient.On("VerifyIDToken", mock.Anything, "user-token").Return(userToken, nil).Maybe()
+
 	// Create repository
 	repo := repository.NewMongoCRUDRepository[models.Order, primitive.ObjectID](DB, "orders")
+	productRepo := repository.NewMongoCRUDRepository[models.Product, primitive.ObjectID](DB, "products")
 
 	// Create handler
 	mux := http.NewServeMux()
-	handler := handlers.NewCRUDHandler(repo)
-	mux.HandleFunc("POST /orders", handler.Create)
-	mux.HandleFunc("GET /orders/{id}", handler.FindById)
-	mux.HandleFunc("PUT /orders/{id}", handler.Update)
-	mux.HandleFunc("DELETE /orders/{id}", handler.DeleteById)
-	mux.HandleFunc("GET /orders", handler.FindPage)
+	handler := handlers.NewOrderHandler(repo, productRepo)
+	mux.HandleFunc("POST /orders", authMiddleware.IsAuthenticated(handler.Create))
+	mux.HandleFunc("GET /orders/{id}", authMiddleware.IsAuthenticated(handler.FindById))
+	mux.HandleFunc("PUT /orders/{id}", authMiddleware.IsAdmin(handler.Update))
+	mux.HandleFunc("DELETE /orders/{id}", authMiddleware.IsAdmin(handler.DeleteById))
+	mux.HandleFunc("GET /orders", authMiddleware.IsAuthenticated(handler.FindPage))
+
+	product, err := productRepo.FindOne(t.Context(), bson.D{
+		primitive.E{Key: "name", Value: "Test Product"},
+	})
+	if err != nil {
+		product = &models.Product{
+			Name:         "Test Product",
+			Price:        100.0,
+			CountInStock: 10,
+			Category:     primitive.NewObjectID(),
+			Description:  "Test Description",
+		}
+		productRepo.Create(context.Background(), product)
+	}
 
 	order := &models.Order{
 		PaymentMethod: "PayPal",
 		ItemsPrice:    100.0,
 		TaxPrice:      10.0,
-		ShippingPrice: 5.0,
-		TotalPrice:    115.0,
+		ShippingPrice: 15.0,
+		TotalPrice:    125.0,
+		OrderItems: []models.OrderItem{
+			{
+				ProductID: *product.ID,
+				Quantity:  1,
+			},
+		},
 	}
 
 	t.Run("Create", func(t *testing.T) {
 		rr := httptest.NewRecorder()
 		jsonBody, err := json.Marshal(order)
 		assert.NoError(t, err)
-		mux.ServeHTTP(rr, httptest.NewRequest("POST", "/orders", bytes.NewBuffer(jsonBody)))
+		req := httptest.NewRequest("POST", "/orders", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Authorization", "Bearer user-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusCreated, rr.Code)
 
 		var createdOrder models.Order
@@ -60,7 +123,9 @@ func TestOrderHandler(t *testing.T) {
 
 	t.Run("FindById", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/orders/"+order.ID.Hex(), nil))
+		req := httptest.NewRequest("GET", "/orders/"+order.ID.Hex(), nil)
+		req.Header.Set("Authorization", "Bearer user-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var foundOrder models.Order
@@ -75,7 +140,9 @@ func TestOrderHandler(t *testing.T) {
 		order.PaymentMethod = "Stripe"
 		jsonBody, err := json.Marshal(order)
 		assert.NoError(t, err)
-		mux.ServeHTTP(rr, httptest.NewRequest("PUT", "/orders/"+order.ID.Hex(), bytes.NewBuffer(jsonBody)))
+		req := httptest.NewRequest("PUT", "/orders/"+order.ID.Hex(), bytes.NewBuffer(jsonBody))
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var updatedOrder models.Order
@@ -83,11 +150,16 @@ func TestOrderHandler(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, order.PaymentMethod, updatedOrder.PaymentMethod)
 		assert.Equal(t, order.ID, updatedOrder.ID)
+
+		assert.GreaterOrEqual(t, order.UpdatedAt.Unix(), updatedOrder.UpdatedAt.Unix())
+		order.UpdatedAt = updatedOrder.UpdatedAt
 	})
 
 	t.Run("FindPage", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/orders?limit=10&offset=0", nil))
+		req := httptest.NewRequest("GET", "/orders?limit=100&offset=0", nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var page repository.Page[models.Order]
@@ -118,13 +190,17 @@ func TestOrderHandler(t *testing.T) {
 
 	t.Run("Delete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("DELETE", "/orders/"+order.ID.Hex(), nil))
+		req := httptest.NewRequest("DELETE", "/orders/"+order.ID.Hex(), nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
 	t.Run("FindByIdAfterDelete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/orders/"+order.ID.Hex(), nil))
+		req := httptest.NewRequest("GET", "/orders/"+order.ID.Hex(), nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 }

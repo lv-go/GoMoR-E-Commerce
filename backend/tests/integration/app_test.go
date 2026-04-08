@@ -27,7 +27,7 @@ func TestIntegration_Health(t *testing.T) {
 func TestIntegration_GetUsers_Unauthorized(t *testing.T) {
 	mux := app.Setup(context.Background())
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/users", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/users", nil)
 	rr := httptest.NewRecorder()
 
 	mux.ServeHTTP(rr, req)

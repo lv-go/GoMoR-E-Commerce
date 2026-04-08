@@ -1,33 +1,33 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import Message from "../../components/Message";
 import ProgressSteps from "../../components/ProgressSteps";
 import Loader from "../../components/Loader";
-import { useCreateOrderMutation } from "../../redux/api/orderApiSlice";
-import { clearCartItems } from "../../redux/features/cart/cartSlice";
 import { useCreate } from "~/hooks/orders";
+import { getCart, clearCartItems } from "~/utils/cartUtils";
+import type { Route } from "./+types/place-order";
 
-export default function PlaceOrder() {
+export async function clientLoader() {
+  return getCart();
+}
+
+export default function PlaceOrder({ loaderData: cart }: Route.ComponentProps) {
   const navigate = useNavigate();
 
-  const cart = useSelector((state: any) => state.cart);
-
   const { mutateAsync: createOrder, isPending: isLoading, error } = useCreate();
-
-  useEffect(() => {
-    if (!cart.shippingAddress.address) {
-      navigate("/shipping");
-    }
-  }, [cart.paymentMethod, cart.shippingAddress.address, navigate]);
-
-  const dispatch = useDispatch();
 
   const placeOrderHandler = async () => {
     try {
       const res = await createOrder({
-        orderItems: cart.cartItems,
+        orderItems: cart.cartItems.map((item) => ({
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          quantity: item.quantity,
+          productId: item._id,
+        })),
         shippingAddress: cart.shippingAddress,
         paymentMethod: cart.paymentMethod,
         itemsPrice: cart.itemsPrice,
@@ -35,10 +35,12 @@ export default function PlaceOrder() {
         taxPrice: cart.taxPrice,
         totalPrice: cart.totalPrice,
       });
-      dispatch(clearCartItems());
-      navigate(`/order/${res._id}`);
-    } catch (error) {
-      toast.error(error);
+      if (res._id) {
+        clearCartItems();
+        navigate(`/order/${res._id}`);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -74,12 +76,12 @@ export default function PlaceOrder() {
                     </td>
 
                     <td className="p-2">
-                      <Link to={`/product/${item.product}`}>{item.name}</Link>
+                      <Link to={`/product/${item._id}`}>{item.name}</Link>
                     </td>
-                    <td className="p-2">{item.qty}</td>
+                    <td className="p-2">{item.quantity}</td>
                     <td className="p-2">{item.price.toFixed(2)}</td>
                     <td className="p-2">
-                      $ {(item.qty * item.price).toFixed(2)}
+                      $ {(item.quantity * item.price).toFixed(2)}
                     </td>
                   </tr>
                 ))}
@@ -130,7 +132,7 @@ export default function PlaceOrder() {
           <button
             type="button"
             className="bg-pink-500 text-white py-2 px-4 rounded-full text-lg w-full mt-4"
-            disabled={cart.cartItems === 0}
+            disabled={cart.cartItems.length === 0}
             onClick={placeOrderHandler}
           >
             Place Order

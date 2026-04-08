@@ -46,9 +46,6 @@ export default function Table<T, ID>({
   const page = data ?? { items: [], total: 0, size: 10, page: 1, totalPages: 1 };
 
   useEffect(() => {
-    console.log("isFetched", isFetched);
-    console.log("isFetching", isFetching);
-    console.log("page", page);
     if (isFetched) {
       reset({ items: page.items });
     }
@@ -199,13 +196,13 @@ export default function Table<T, ID>({
         </thead>
         <tbody>
           {items.map((item, index) => (
-            <tr key={item.id}>
+            <tr key={getItemId(item) as any}>
               <td>
                 <input type="checkbox" className="checkbox"
                   aria-label="Select Category" title="Select Category"
-                  value={item.id}
-                  checked={selectedItemsIds.has(item.id ?? "")}
-                  onChange={handleSelectItem(item.id)} />
+                  value={getItemId(item) as any}
+                  checked={selectedItemsIds.has(getItemId(item) as any)}
+                  onChange={handleSelectItem(getItemId(item) as any)} />
               </td>
               {columns.map((column) => {
                 return <td key={column.key}>{(editingRows.has(index))

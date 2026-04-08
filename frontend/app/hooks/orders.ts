@@ -84,3 +84,69 @@ export function useGetTotalSalesByDateQuery() {
     queryFn: () => fetchWithAuth("/orders/total-sales-by-date"),
   });
 }
+
+export function useGetPaypalClientIdQuery() {
+  return useQuery<string>({
+    queryKey: ["orders", "paypal-client-id"],
+    queryFn: () => fetchWithAuth("/config/paypal"),
+  });
+}
+
+export function usePayOrderMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Order, Error, { id: string; data: Partial<Order> }>({
+    mutationFn: ({ id, data }) =>
+      fetchWithAuth(`/orders/${id}/pay`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["order", id] });
+    },
+  });
+}
+
+export function useDeliverOrderMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Order, Error, { id: string; data: Partial<Order> }>({
+    mutationFn: ({ id, data }) =>
+      fetchWithAuth(`/orders/${id}/deliver`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["order", id] });
+    },
+  });
+}
+
+export function newOrder(): Order {
+  return {
+    _id: "",
+    user: {
+      _id: "",
+      username: "",
+      email: "",
+    },
+    orderItems: [],
+    shippingAddress: {
+      address: "",
+      city: "",
+      postalCode: "",
+      country: "",
+    },
+    paymentMethod: "",
+    itemsPrice: 0,
+    shippingPrice: 0,
+    taxPrice: 0,
+    totalPrice: 0,
+    isPaid: false,
+    isDelivered: false,
+    createdAt: "",
+    updatedAt: "",
+  };
+}

@@ -1,14 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import {
-  saveShippingAddress,
-  savePaymentMethod,
-} from "../../redux/features/cart/cartSlice";
 import ProgressSteps from "../../components/ProgressSteps";
+import { getCart, savePaymentMethod, saveShippingAddress } from "~/utils/cartUtils";
+import type { Route } from "./+types/shipping";
 
-export default function Shipping() {
-  const cart = useSelector((state: any) => state.cart);
+export function meta() {
+  return [
+    { title: "GoMoR-E-Commerce - Shipping" },
+    { name: "description", content: "GoMoR-E-Commerce - Shipping" },
+  ];
+}
+
+export async function clientLoader() {
+  return getCart();
+}
+
+export default function Shipping({ loaderData: cart }: Route.ComponentProps) {
   const { shippingAddress } = cart;
 
   const [paymentMethod, setPaymentMethod] = useState("PayPal");
@@ -22,20 +30,13 @@ export default function Shipping() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const submitHandler = (e) => {
+  const submitHandler = (e: SubmitEvent) => {
     e.preventDefault();
 
-    dispatch(saveShippingAddress({ address, city, postalCode, country }));
-    dispatch(savePaymentMethod(paymentMethod));
+    saveShippingAddress({ address, city, postalCode, country });
+    savePaymentMethod(paymentMethod);
     navigate("/place-order");
   };
-
-  // Payment
-  useEffect(() => {
-    if (!shippingAddress.address) {
-      navigate("/shipping");
-    }
-  }, [navigate, shippingAddress]);
 
   return (
     <div className="container mx-auto mt-10">

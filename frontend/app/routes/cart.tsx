@@ -1,9 +1,9 @@
-import { Link, useNavigate } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
 import { FaTrash } from "react-icons/fa";
-import { addToCart, removeFromCart } from "../redux/features/cart/cartSlice";
-import type { Route } from "./+types/cart";
+import { Link, useRevalidator } from "react-router";
+import type { Cart, CartItem } from "~/schemas/cart";
 import type { Product } from "~/schemas/product";
+import { getCart, removeFromCart, updateCartItemQty } from "~/utils/cartUtils";
+import type { Route } from "./+types/cart";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -12,23 +12,22 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
-export default function Cart() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
+export async function clientLoader(): Promise<Cart> {
+  return getCart();
+}
 
-  const cart = useSelector((state: any) => state.cart);
-  const { cartItems } = cart;
+export default function Cart({ loaderData: cart }: Route.ComponentProps) {
+  const { cartItems = [] } = cart;
+  const { revalidate } = useRevalidator();
 
-  const addToCartHandler = (product: Product, qty: number) => {
-    dispatch(addToCart({ ...product, qty }));
+  const addToCartHandler = (id: string, qty: number) => {
+    updateCartItemQty(id, qty);
+    revalidate();
   };
 
   const removeFromCartHandler = (id: string) => {
-    dispatch(removeFromCart(id));
-  };
-
-  const checkoutHandler = () => {
-    navigate("/login?redirect=/shipping");
+    removeFromCart(id);
+    revalidate();
   };
 
   return (
@@ -43,7 +42,7 @@ export default function Cart() {
             <div className="flex flex-col w-[80%]">
               <h1 className="text-2xl font-semibold mb-4">Shopping Cart</h1>
 
-              {cartItems.map((item: any) => (
+              {cartItems.map((item: CartItem) => (
                 <div key={item._id} className="flex items-center mb-[1rem] pb-2">
                   <div className="w-[5rem] h-[5rem]">
                     <img
@@ -67,9 +66,9 @@ export default function Cart() {
                   <div className="w-24">
                     <select
                       className="w-full p-1 border rounded text-black"
-                      value={item.qty}
+                      value={item.quantity}
                       onChange={(e) =>
-                        addToCartHandler(item, Number(e.target.value))
+                        addToCartHandler(item._id, Number(e.target.value))
                       }
                     >
                       {[...Array(item.countInStock).keys()].map((x) => (
@@ -94,14 +93,12 @@ export default function Cart() {
               <div className="mt-8 w-[40rem]">
                 <div className="p-4 rounded-lg">
                   <h2 className="text-xl font-semibold mb-2">
-                    Items ({cartItems.reduce((acc: number, item: any) => acc + item.qty, 0)})
+                    Items ({cartItems.reduce((acc: number, item: CartItem) => acc + item.quantity, 0)})
                   </h2>
 
                   <div className="text-2xl font-bold">
                     ${" "}
-                    {cartItems
-                      .reduce((acc: number, item: any) => acc + item.qty * item.price, 0)
-                      .toFixed(2)}
+                    {cart.itemsPrice.toFixed(2)}
                   </div>
 
                   <Link

@@ -8,11 +8,11 @@ import (
 )
 
 type OrderItem struct {
-	Product primitive.ObjectID `json:"product" bson:"product"`
-	Name    string             `json:"name" bson:"name"`
-	Qty     int                `json:"qty" bson:"qty"`
-	Image   string             `json:"image" bson:"image"`
-	Price   float64            `json:"price" bson:"price"`
+	ProductID primitive.ObjectID `json:"productId" bson:"productId"`
+	Name      string             `json:"name" bson:"name"`
+	Quantity  int                `json:"quantity" bson:"quantity"`
+	Image     string             `json:"image" bson:"image"`
+	Price     float64            `json:"price" bson:"price"`
 }
 
 type ShippingAddress struct {
@@ -32,7 +32,7 @@ type PaymentResult struct {
 type Order struct {
 	repository.Auditable
 	ID              *primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	User            primitive.ObjectID  `json:"user" bson:"user"`
+	UserID          string              `json:"userId" bson:"userId"`
 	OrderItems      []OrderItem         `json:"orderItems" bson:"orderItems"`
 	ShippingAddress ShippingAddress     `json:"shippingAddress" bson:"shippingAddress"`
 	PaymentMethod   string              `json:"paymentMethod" bson:"paymentMethod"`

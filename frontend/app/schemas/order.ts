@@ -2,10 +2,10 @@ import { z } from "zod";
 
 export const orderItemSchema = z.object({
   name: z.string().min(1),
-  qty: z.number().int().min(1),
+  quantity: z.number().int().min(1),
   image: z.string().min(1),
   price: z.number().min(0),
-  product: z.string(), // ObjectId as string
+  productId: z.string(), // ObjectId as string
 });
 
 export const shippingAddressSchema = z.object({
@@ -24,7 +24,11 @@ export const paymentResultSchema = z.object({
 
 export const orderSchema = z.object({
   _id: z.string().optional(),
-  user: z.string(), // ObjectId as string
+  user: z.object({
+    _id: z.string(),
+    username: z.string(),
+    email: z.string(),
+  }),
   orderItems: z.array(orderItemSchema),
   shippingAddress: shippingAddressSchema,
   paymentMethod: z.string().min(1),

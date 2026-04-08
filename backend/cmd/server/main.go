@@ -7,8 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"gomor-e-commerce/internal/app"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -21,6 +22,16 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
+	logLevel := os.Getenv("LOG_LEVEL")
+	if logLevel == "" {
+		logLevel = "INFO"
+	}
+	logLevelVar := slog.LevelVar{}
+	if err := logLevelVar.UnmarshalText([]byte(logLevel)); err != nil {
+		slog.Error("Error unmarshalling log level", "error", err)
+	}
+	slog.SetLogLoggerLevel(logLevelVar.Level())
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

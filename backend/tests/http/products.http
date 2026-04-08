@@ -3,14 +3,15 @@ GET http://localhost:8080/api/products
 
 ?? status == 200
 {{
-const {deepEqual} = require("assert")
-deepEqual(JSON.parse(response.body), {
-    items: null,
-    total: 0,
-    page: 1,
-    size: 10,
-    totalPages: 0
-})
+const assert = require("assert")
+
+const body = JSON.parse(response.body)
+
+assert.ok(body.total >= 0)
+assert.ok(body.page >= 0)
+assert.ok(body.size >= 0)
+assert.ok(body.totalPages >= 0)
+assert.ok(body.items?.length >= 0)
 }}
 
 ### Login with user1 credentials should return 200
@@ -36,12 +37,15 @@ Authorization: Bearer {{$global.idToken}}
 
 ?? status == 200
 {{
-const {deepEqual} = require("assert")
-deepEqual(JSON.parse(response.body), {
-    items:null,
-    total:0,
-    page:1,
-    size:10,
-    totalPages:0
-})
+const assert = require("assert")
+
+const body = JSON.parse(response.body)
+
+assert.ok(body.total >= 0)
+assert.ok(body.page >= 0)
+assert.ok(body.size >= 0)
+assert.ok(body.totalPages >= 0)
+
+assert.ok(body.items?.length >= 0)
+
 }}

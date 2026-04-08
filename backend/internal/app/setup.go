@@ -2,11 +2,15 @@ package app
 
 import (
 	"context"
+	"errors"
 	"gomor-e-commerce/internal/auth"
 	"gomor-e-commerce/internal/handlers"
 	"gomor-e-commerce/internal/models"
 	"gomor-e-commerce/internal/repository"
+	"gomor-e-commerce/internal/utils"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -55,12 +59,26 @@ func Setup(ctx context.Context) http.Handler {
 	apiMux.HandleFunc(http.MethodGet+" /categories/{id}", categoryHandler.FindById)
 	apiMux.HandleFunc(http.MethodGet+" /categories", categoryHandler.FindPage)
 
-	orderHandler := handlers.NewCRUDHandler(orderRepo)
+	orderHandler := handlers.NewOrderHandler(orderRepo, productRepo)
 	apiMux.HandleFunc(http.MethodPost+" /orders", authMiddleware.IsAuthenticated(orderHandler.Create))
 	apiMux.HandleFunc(http.MethodPut+" /orders/{id}", authMiddleware.IsAdmin(orderHandler.Update))
 	apiMux.HandleFunc(http.MethodDelete+" /orders/{id}", authMiddleware.IsAdmin(orderHandler.DeleteById))
 	apiMux.HandleFunc(http.MethodGet+" /orders/{id}", authMiddleware.IsAuthenticated(orderHandler.FindById))
 	apiMux.HandleFunc(http.MethodGet+" /orders", authMiddleware.IsAdmin(orderHandler.FindPage))
+
+	// PayPal config
+	apiMux.HandleFunc("/config/paypal", func(w http.ResponseWriter, r *http.Request) {
+		slog.Debug("PayPal config")
+		clientId := os.Getenv("PAYPAL_CLIENT_ID")
+		if clientId == "" {
+			slog.Error("PAYPAL_CLIENT_ID not set")
+			utils.InternalServerError(w, r, errors.New("PAYPAL_CLIENT_ID not set"))
+			return
+		}
+		utils.WriteJSON(w, http.StatusOK, map[string]string{
+			"clientId": clientId,
+		})
+	})
 
 	// Health check
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {

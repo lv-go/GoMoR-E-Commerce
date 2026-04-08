@@ -2,10 +2,18 @@ import Table from "~/components/Table";
 import { useCreate, useDeleteById, useGetPage, useUpdate } from "~/hooks/products";
 import { getId, newProduct } from "~/schemas/product";
 import { useGetPage as useCategoriesGetPage } from "~/hooks/categories";
+import { useMemo } from "react";
 
 export default function AllProducts() {
   const { data, isLoading, error, isFetched, isFetching } = useCategoriesGetPage({ offset: 0, limit: 100 });
   const categories = data?.items ?? [];
+
+  const categoriesMap = useMemo(
+    () => new Map(categories.map((category) =>
+      [category._id, category])
+    ),
+    [categories]
+  );
 
   return <Table
     header="Manage Products"
@@ -31,15 +39,9 @@ export default function AllProducts() {
       content: (item) => item.brand,
       editor: (register) => <input className="input input-bordered" {...register} />,
     }, {
-      key: "quantity",
-      header: "Quantity",
-      content: (item) => item.quantity,
-      editor: (register) => <input type="number" className="input input-bordered" {...register} />,
-      registerOptions: { min: 0, max: 100, valueAsNumber: true },
-    }, {
       key: "category",
       header: "Category",
-      content: (item) => item.category,
+      content: (item) => categoriesMap.get(item.categoryId)?.name,
       editor: (register) => <select className="select select-bordered" {...register}>
         {categories.map((category) => (
           <option key={category._id} value={category._id}>{category.name}</option>

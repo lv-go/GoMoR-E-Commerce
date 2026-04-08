@@ -1,14 +1,5 @@
 import { z } from "zod";
-
-export const reviewSchema = z.object({
-  _id: z.string().optional(),
-  name: z.string().min(1),
-  rating: z.number().min(0).max(5),
-  comment: z.string().min(1),
-  user: z.string(), // ObjectId as string
-  createdAt: z.iso.datetime().optional(),
-  updatedAt: z.iso.datetime().optional(),
-});
+import { reviewSchema } from "./review";
 
 export const productSchema = z.object({
   _id: z.string().optional(),
@@ -16,7 +7,7 @@ export const productSchema = z.object({
   image: z.string().min(1),
   brand: z.string().min(1),
   quantity: z.number().int().min(0),
-  category: z.string(), // ObjectId as string
+  categoryId: z.string(), // ObjectId as string
   description: z.string().min(1),
   reviews: z.array(reviewSchema).default([]),
   rating: z.number().min(0).max(5).default(0),
@@ -27,7 +18,6 @@ export const productSchema = z.object({
   updatedAt: z.iso.datetime().optional(),
 });
 
-export type Review = z.infer<typeof reviewSchema>;
 export type Product = z.infer<typeof productSchema>;
 
 export const newProduct = (): Product => ({
@@ -35,7 +25,7 @@ export const newProduct = (): Product => ({
   image: "",
   brand: "",
   quantity: 0,
-  category: "",
+  categoryId: "",
   description: "",
   reviews: [],
   rating: 0,

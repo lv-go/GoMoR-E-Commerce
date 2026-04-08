@@ -75,3 +75,18 @@ export function useDeleteById() {
     },
   });
 }
+
+export function useCreateReview() {
+  const queryClient = useQueryClient();
+
+  return useMutation<Product, Error, { productId: string; rating: number; comment: string }>({
+    mutationFn: ({ productId, rating, comment }) =>
+      fetchWithAuth(`/products/${productId}/reviews`, {
+        method: "POST",
+        body: JSON.stringify({ rating, comment }),
+      }),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["product", id] });
+    },
+  });
+}
