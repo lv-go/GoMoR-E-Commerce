@@ -1,18 +1,25 @@
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import { useCreate } from "~/hooks/orders";
-import { clearCartItems, getCart } from "~/utils/cartUtils";
 import Loader from "../../components/Loader";
 import Message from "../../components/Message";
 import ProgressSteps from "../../components/ProgressSteps";
 import type { Route } from "./+types/place-order";
+import { useClearCart, useGetCart } from "~/hooks/cart";
+import { newCart } from "~/schemas/cart";
 
-export async function clientLoader() {
-  return getCart();
+export function meta({ }: Route.MetaArgs) {
+  return [
+    { title: "GoMoR-E-Commerce - Place Order" },
+    { name: "description", content: "Place your order." },
+  ];
 }
 
-export default function PlaceOrder({ loaderData: cart }: Route.ComponentProps) {
+export default function PlaceOrder() {
   const navigate = useNavigate();
+
+  const { data: cart = newCart() } = useGetCart();
+  const { mutate: clearCartItems } = useClearCart();
 
   const { mutateAsync: createOrder, isPending: isLoading, error } = useCreate();
 

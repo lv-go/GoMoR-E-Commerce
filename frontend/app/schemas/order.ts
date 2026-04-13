@@ -24,11 +24,7 @@ export const paymentResultSchema = z.object({
 
 export const orderSchema = z.object({
   _id: z.string().optional(),
-  user: z.object({
-    _id: z.string(),
-    username: z.string(),
-    email: z.string(),
-  }),
+  userId: z.string(),
   orderItems: z.array(orderItemSchema),
   shippingAddress: shippingAddressSchema,
   paymentMethod: z.string().min(1),

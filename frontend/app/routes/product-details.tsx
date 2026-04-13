@@ -17,8 +17,8 @@ import Ratings from "~/components/Products/Ratings";
 import { useFirebaseAuth } from "~/FirebaseAuthContext";
 import { useCreateReview, useGetById } from "~/hooks/products";
 import { newProduct } from "~/schemas/product";
-import { addCartItem } from "~/utils/cartUtils";
 import type { Route } from "./+types/product-details";
+import { useAddToCart } from "~/hooks/cart";
 
 
 export function meta({ }: Route.MetaArgs) {
@@ -26,10 +26,6 @@ export function meta({ }: Route.MetaArgs) {
     { title: "GoMoR-E-Commerce - Product Details" },
     { name: "description", content: "Welcome to GoMoR-E-Commerce!" },
   ];
-}
-
-export async function clientLoader({ params }: Route.LoaderArgs) {
-  return params.id;
 }
 
 export default function ProductDetails() {
@@ -43,6 +39,7 @@ export default function ProductDetails() {
   const { data: product = newProduct(), isLoading, refetch, error } = useGetById(productId || "");
 
   const { user: userInfo } = useFirebaseAuth();
+  const { mutate: addToCart } = useAddToCart();
 
   const { mutateAsync: createReview, isPending: loadingProductReview } = useCreateReview();
 
@@ -63,12 +60,8 @@ export default function ProductDetails() {
   };
 
   const addToCartHandler = () => {
-    addCartItem({
-      _id: product._id as string,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      countInStock: product.countInStock,
+    addToCart({
+      product,
       quantity,
     });
     navigate("/cart");

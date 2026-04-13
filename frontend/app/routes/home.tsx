@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router";
 import Header from "~/components/Header";
 import Loader from "~/components/Loader";
 import Message from "~/components/Message";
-import Product from "~/components/Products/Product";
+import ProductInfo from "~/components/Products/ProductInfo";
 import { useGetPage } from "~/hooks/products";
 import type { Route } from "./+types/home";
 
@@ -16,6 +16,7 @@ export function meta({ }: Route.MetaArgs) {
 export default function Home() {
   const { keyword } = useParams();
   const { data, isLoading, isError, error } = useGetPage({ keyword });
+  const products = data?.items || [];
 
   return <>
     {!keyword ? <Header /> : null}
@@ -40,12 +41,12 @@ export default function Home() {
           <div className="flex justify-center flex-wrap mt-[2rem]">
             {isError ? (
               <Message variant="error">
-                {error?.data?.message || error?.error || "Something went wrong"}
+                {error?.message || "Something went wrong"}
               </Message>
             ) : (
-              data.products?.map((product) => (
+              products.map((product) => (
                 <div key={product._id}>
-                  <Product product={product} />
+                  <ProductInfo product={product} />
                 </div>
               ))
             )}

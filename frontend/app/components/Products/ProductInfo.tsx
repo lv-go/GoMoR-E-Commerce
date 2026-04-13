@@ -1,7 +1,8 @@
 import { Link } from "react-router";
+import type { Product } from "~/schemas/product";
 import HeartIcon from "./HeartIcon";
 
-const Product = ({ product }) => {
+export default function ProductInfo({ product }: { product: Product }) {
   return (
     <div className="w-[30rem] ml-[2rem] p-3 relative">
       <div className="relative">
@@ -25,6 +26,4 @@ const Product = ({ product }) => {
       </div>
     </div>
   );
-};
-
-export default Product;
+}

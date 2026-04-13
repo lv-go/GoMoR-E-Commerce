@@ -5,6 +5,7 @@ export const cartItemSchema = z.object({
   name: z.string().min(1),
   price: z.number().min(0),
   image: z.string().min(1),
+  brand: z.string().min(1),
   countInStock: z.number().min(0),
   quantity: z.number().min(1),
 });

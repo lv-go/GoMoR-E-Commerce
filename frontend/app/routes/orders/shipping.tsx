@@ -1,8 +1,8 @@
 import { useState, type SubmitEvent } from "react";
 import { useNavigate } from "react-router";
-import { getCart, savePaymentMethod, saveShippingAddress } from "~/utils/cartUtils";
+import { useGetCart, useSavePaymentMethod, useSaveShippingAddress } from "~/hooks/cart";
+import { newCart } from "~/schemas/cart";
 import ProgressSteps from "../../components/ProgressSteps";
-import type { Route } from "./+types/shipping";
 
 export function meta() {
   return [
@@ -11,12 +11,11 @@ export function meta() {
   ];
 }
 
-export async function clientLoader() {
-  return getCart();
-}
-
-export default function Shipping({ loaderData: cart }: Route.ComponentProps) {
+export default function Shipping() {
+  const { data: cart = newCart() } = useGetCart();
   const { shippingAddress } = cart;
+  const { mutate: saveShippingAddress } = useSaveShippingAddress();
+  const { mutate: savePaymentMethod } = useSavePaymentMethod();
 
   const [paymentMethod, setPaymentMethod] = useState("PayPal");
   const [address, setAddress] = useState(shippingAddress.address || "");

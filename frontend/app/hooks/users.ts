@@ -3,10 +3,10 @@ import { fetchWithAuth } from "../utils/api";
 import { type User } from "../schemas/user";
 import { type Page } from "../schemas/api";
 
-export function useGetPage(offset: number = 0, limit: number = 10) {
+export function useGetPage({ offset = 0, limit = 10, ids_in }: { offset?: number; limit?: number; ids_in?: string[] }) {
   return useQuery<Page<User>>({
-    queryKey: ["users", "page", { offset, limit }],
-    queryFn: () => fetchWithAuth(`/users?offset=${offset}&limit=${limit}`),
+    queryKey: ["users", "page", { offset, limit, ids_in }],
+    queryFn: () => fetchWithAuth(`/users`, { offset, limit, ids_in }),
   });
 }
 

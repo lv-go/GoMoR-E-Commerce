@@ -1,8 +1,7 @@
 import { FaTrash } from "react-icons/fa";
-import { Link, useRevalidator } from "react-router";
-import type { Cart, CartItem } from "~/schemas/cart";
-import type { Product } from "~/schemas/product";
-import { getCart, removeFromCart, updateCartItemQty } from "~/utils/cartUtils";
+import { Link } from "react-router";
+import { useGetCart, useRemoveFromCart, useUpdateCart } from "~/hooks/cart";
+import { newCart, type CartItem } from "~/schemas/cart";
 import type { Route } from "./+types/cart";
 
 export function meta({ }: Route.MetaArgs) {
@@ -12,23 +11,12 @@ export function meta({ }: Route.MetaArgs) {
   ];
 }
 
-export async function clientLoader(): Promise<Cart> {
-  return getCart();
-}
-
-export default function Cart({ loaderData: cart }: Route.ComponentProps) {
+export default function Cart() {
+  const { data: cart = newCart(), isLoading, error } = useGetCart();
   const { cartItems = [] } = cart;
-  const { revalidate } = useRevalidator();
 
-  const addToCartHandler = (id: string, qty: number) => {
-    updateCartItemQty(id, qty);
-    revalidate();
-  };
-
-  const removeFromCartHandler = (id: string) => {
-    removeFromCart(id);
-    revalidate();
-  };
+  const { mutate: removeFromCart } = useRemoveFromCart();
+  const { mutate: updateCart } = useUpdateCart();
 
   return (
     <>
@@ -68,7 +56,7 @@ export default function Cart({ loaderData: cart }: Route.ComponentProps) {
                       className="w-full p-1 border rounded text-black"
                       value={item.quantity}
                       onChange={(e) =>
-                        addToCartHandler(item._id, Number(e.target.value))
+                        updateCart({ _id: item._id, quantity: Number(e.target.value) })
                       }
                     >
                       {[...Array(item.countInStock).keys()].map((x) => (
@@ -82,7 +70,7 @@ export default function Cart({ loaderData: cart }: Route.ComponentProps) {
                   <div>
                     <button
                       className="text-red-500 mr-[5rem]"
-                      onClick={() => removeFromCartHandler(item._id)}
+                      onClick={() => removeFromCart(item._id)}
                     >
                       <FaTrash className="ml-[1rem] mt-[.5rem]" />
                     </button>

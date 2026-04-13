@@ -1,4 +1,3 @@
-import { useGetTopProductsQuery } from "../../redux/api/productApiSlice";
 import Message from "../../components/Message";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -13,7 +12,7 @@ import {
 } from "react-icons/fa";
 import { useGetTopProducts } from "~/hooks/products";
 
-const ProductCarousel = () => {
+export default function ProductCarousel() {
   const { data, isLoading, error } = useGetTopProducts();
   const products = data?.items || [];
 
@@ -31,7 +30,7 @@ const ProductCarousel = () => {
   return (
     <div className="mb-4 lg:block xl:block md:block">
       {isLoading ? null : error ? (
-        <Message variant="danger">
+        <Message variant="error">
           {error.message}
         </Message>
       ) : (
@@ -107,6 +106,4 @@ const ProductCarousel = () => {
       )}
     </div>
   );
-};
-
-export default ProductCarousel;
+}

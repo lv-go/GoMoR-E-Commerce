@@ -1,18 +1,18 @@
 import { Link } from "react-router";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { useDispatch } from "react-redux";
-import { addToCart } from "../../redux/features/cart/cartSlice";
 import { toast } from "react-toastify";
 import HeartIcon from "./HeartIcon";
 import { type Product } from "~/schemas/product";
+import { useAddToCart } from "~/hooks/cart";
 
-const ProductCard = ({ p }: { p: Product }) => {
-  const dispatch = useDispatch();
+export default function ProductCard({ p }: { p: Product }) {
+  const { mutate: addToCart } = useAddToCart();
 
-  const addToCartHandler = (product: Product, qty: number) => {
-    dispatch(addToCart({ ...product, qty }));
+  const addToCartHandler = (product: Product, quantity: number) => {
+    addToCart({ product, quantity });
     toast.success("Item added successfully", {
-      position: toast.POSITION.TOP_RIGHT,
+      position: "top-right",
       autoClose: 2000,
     });
   };
@@ -50,10 +50,10 @@ const ProductCard = ({ p }: { p: Product }) => {
           {p?.description?.substring(0, 60)} ...
         </p>
 
-        <section className="flex justify-between items-center">
+        <section className="flex justify-between items-center space-x-2">
           <Link
             to={`/product/${p._id}`}
-            className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-pink-700 rounded-lg hover:bg-pink-800 focus:ring-4 focus:outline-none focus:ring-pink-300 dark:bg-pink-600 dark:hover:bg-pink-700 dark:focus:ring-pink-800"
+            className="btn btn-primary"
           >
             Read More
             <svg
@@ -74,7 +74,7 @@ const ProductCard = ({ p }: { p: Product }) => {
           </Link>
 
           <button
-            className="p-2 rounded-full"
+            className="btn btn-primary"
             onClick={() => addToCartHandler(p, 1)}
           >
             <AiOutlineShoppingCart size={25} />
@@ -83,6 +83,4 @@ const ProductCard = ({ p }: { p: Product }) => {
       </div>
     </div>
   );
-};
-
-export default ProductCard;
+}

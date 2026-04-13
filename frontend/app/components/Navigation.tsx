@@ -6,29 +6,29 @@ import {
   AiOutlineShoppingCart,
   AiOutlineUserAdd,
 } from "react-icons/ai";
-import { FaBox, FaBriefcase, FaChartBar, FaHeart, FaShoppingBag, FaShoppingCart, FaSignOutAlt, FaTags, FaUser, FaUsers } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { FaBox, FaBriefcase, FaChartBar, FaHeart, FaSignOutAlt, FaTags, FaUser, FaUsers } from "react-icons/fa";
 import { Link, NavLink, useNavigate } from "react-router";
 import { useFirebaseAuth } from "~/FirebaseAuthContext";
 import { auth } from "~/firebase-config";
+import { useClearCart, useGetCart } from "~/hooks/cart";
+import { newCart } from "~/schemas/cart";
 import FavoritesCount from "./Products/FavoritesCount";
+import { useClearFavorites } from "~/hooks/favorites";
 
 export default function Navigation() {
   const { user } = useFirebaseAuth();
-  const { cartItems } = useSelector((state: any) => state.cart);
-
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false);
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
+  const { data: cart = newCart() } = useGetCart();
+  const cartItems = cart.cartItems;
+  const { mutate: clearCart } = useClearCart();
+  const { mutate: clearFavorites } = useClearFavorites();
 
   const navigate = useNavigate();
 
   const logoutHandler = async () => {
     try {
       await auth.signOut();
+      clearCart();
+      clearFavorites();
       navigate("/login");
     } catch (error) {
       console.error(error);
@@ -69,7 +69,7 @@ export default function Navigation() {
             {cartItems.length > 0 && (
               <span>
                 <span className="px-1 py-0 text-sm text-white bg-pink-500 rounded-full">
-                  {cartItems.reduce((a: number, c: any) => a + c.qty, 0)}
+                  {cartItems.reduce((a: number, c) => a + c.quantity, 0)}
                 </span>
               </span>
             )}

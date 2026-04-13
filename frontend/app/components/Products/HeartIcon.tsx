@@ -1,22 +1,20 @@
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { useAddFavorite, useGetIsFavoriteById, useRemoveFavorite } from "~/hooks/favorites";
 
 import { type Product } from "~/schemas/product";
-import {
-  addFavoriteToLocalStorage,
-  getFavoritesFromLocalStorage,
-  removeFavoriteFromLocalStorage,
-} from "~/utils/favorites";
 
-const HeartIcon = ({ product }: { product: Product }) => {
-  const favorites = getFavoritesFromLocalStorage();
-  const isFavorite = favorites.some((p: Product) => p._id === product._id);
+export default function HeartIcon({ product }: { product: Product }) {
+  const { data: isFavorite = false } = useGetIsFavoriteById(product._id!);
+  const { mutate: addFavorite } = useAddFavorite();
+  const { mutate: removeFavorite } = useRemoveFavorite();
+
 
 
   const toggleFavorites = () => {
     if (isFavorite) {
-      removeFavoriteFromLocalStorage(product._id!);
+      removeFavorite(product._id!);
     } else {
-      addFavoriteToLocalStorage(product);
+      addFavorite(product);
     }
   };
 
@@ -28,10 +26,8 @@ const HeartIcon = ({ product }: { product: Product }) => {
       {isFavorite ? (
         <FaHeart className="text-pink-500" />
       ) : (
-        <FaRegHeart className="text-white" />
+        <FaRegHeart className="text-black" />
       )}
     </div>
   );
-};
-
-export default HeartIcon;
+}

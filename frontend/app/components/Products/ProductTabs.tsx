@@ -5,7 +5,7 @@ import Loader from "~/components/Loader";
 import { useGetTopProducts } from "~/hooks/products";
 import SmallProduct from "./SmallProduct";
 
-const ProductTabs = ({
+export default function ProductTabs({
   loadingProductReview,
   userInfo,
   submitHandler,
@@ -23,7 +23,7 @@ const ProductTabs = ({
   comment: string;
   setComment: (comment: string) => void;
   product: any;
-}) => {
+}) {
   const { data, isLoading } = useGetTopProducts();
   const products = data?.items || [];
 
@@ -165,6 +165,4 @@ const ProductTabs = ({
       </section>
     </div>
   );
-};
-
-export default ProductTabs;
+}
