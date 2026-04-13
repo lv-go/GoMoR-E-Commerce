@@ -1,12 +1,10 @@
-import { useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useCreate } from "~/hooks/orders";
+import { clearCartItems, getCart } from "~/utils/cartUtils";
+import Loader from "../../components/Loader";
 import Message from "../../components/Message";
 import ProgressSteps from "../../components/ProgressSteps";
-import Loader from "../../components/Loader";
-import { useCreate } from "~/hooks/orders";
-import { getCart, clearCartItems } from "~/utils/cartUtils";
 import type { Route } from "./+types/place-order";
 
 export async function clientLoader() {

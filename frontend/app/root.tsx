@@ -20,6 +20,8 @@ import { queryClient } from "./utils/query-client";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 
+const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || "test-client-id";
+
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -54,7 +56,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return <Provider store={store}>
     <QueryClientProvider client={queryClient}>
-      <PayPalScriptProvider options={{ clientId: "test" }}>
+      <PayPalScriptProvider options={{ clientId, currency: "USD", intent: "capture" }}>
         <FirebaseAuthProvider>
           <ToastContainer />
           <div className="drawer lg:drawer-open">

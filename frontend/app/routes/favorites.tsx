@@ -1,10 +1,11 @@
-import { useSelector } from "react-redux";
-import { selectFavoriteProduct } from "../redux/features/favorites/favoriteSlice";
 import Product from "../components/Products/Product";
+import type { Route } from "./+types/favorites";
 
-const Favorites = () => {
-  const favorites = useSelector(selectFavoriteProduct);
+export async function clientLoader() {
+  return JSON.parse(sessionStorage.getItem("favorite_products") || "[]")
+}
 
+export default function Favorites({ loaderData: favorites }: Route.ComponentProps) {
   return (
     <div className="ml-[10rem]">
       <h1 className="text-lg font-bold ml-[3rem] mt-[3rem]">
@@ -18,6 +19,4 @@ const Favorites = () => {
       </div>
     </div>
   );
-};
-
-export default Favorites;
+}

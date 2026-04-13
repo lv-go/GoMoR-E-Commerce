@@ -1,10 +1,10 @@
-import type { Route } from "./+types/home";
 import { Link, useParams } from "react-router";
 import Header from "~/components/Header";
 import Loader from "~/components/Loader";
 import Message from "~/components/Message";
 import Product from "~/components/Products/Product";
-import { useGetProductsQuery, useGetTopProductsQuery } from "~/redux/api/productApiSlice";
+import { useGetPage } from "~/hooks/products";
+import type { Route } from "./+types/home";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -15,7 +15,7 @@ export function meta({ }: Route.MetaArgs) {
 
 export default function Home() {
   const { keyword } = useParams();
-  const { data, isLoading, isError, error } = useGetProductsQuery({ keyword });
+  const { data, isLoading, isError, error } = useGetPage({ keyword });
 
   return <>
     {!keyword ? <Header /> : null}

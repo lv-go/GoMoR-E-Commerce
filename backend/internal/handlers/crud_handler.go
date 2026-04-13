@@ -52,31 +52,35 @@ func (h *CRUDHandler[T, ID]) Create(w http.ResponseWriter, r *http.Request) {
 	var entity T
 	err := json.NewDecoder(r.Body).Decode(&entity)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.BadRequestResponse(w, r, err)
+		return
+	}
+	err = utils.ValidateStruct(&entity)
+	if err != nil {
+		utils.BadRequestResponse(w, r, err)
 		return
 	}
 	err = h.repo.Create(r.Context(), &entity)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.InternalServerError(w, r, err)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(entity)
+	utils.WriteJSON(w, http.StatusCreated, &entity)
 }
 
 func (h *CRUDHandler[T, ID]) FindById(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("FindById", "id", r.PathValue("id"))
 	id, err := h.parseID(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.BadRequestResponse(w, r, err)
 		return
 	}
 	entity, err := h.repo.FindById(r.Context(), *id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		utils.NotFoundResponse(w, r, err)
 		return
 	}
-	json.NewEncoder(w).Encode(entity)
+	utils.WriteJSON(w, http.StatusOK, entity)
 }
 
 func (h *CRUDHandler[T, ID]) Update(w http.ResponseWriter, r *http.Request) {
@@ -84,28 +88,32 @@ func (h *CRUDHandler[T, ID]) Update(w http.ResponseWriter, r *http.Request) {
 	var entity T
 	err := json.NewDecoder(r.Body).Decode(&entity)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.BadRequestResponse(w, r, err)
+		return
+	}
+	err = utils.ValidateStruct(&entity)
+	if err != nil {
+		utils.BadRequestResponse(w, r, err)
 		return
 	}
 	err = h.repo.Update(r.Context(), &entity)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.InternalServerError(w, r, err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(entity)
+	utils.WriteJSON(w, http.StatusOK, entity)
 }
 
 func (h *CRUDHandler[T, ID]) DeleteById(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("Delete", "id", r.PathValue("id"))
 	id, err := h.parseID(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.BadRequestResponse(w, r, err)
 		return
 	}
 	err = h.repo.Delete(r.Context(), *id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.InternalServerError(w, r, err)
 		return
 	}
 	utils.WriteJSONMessage(w, http.StatusOK, "Deleted successfully")
@@ -123,7 +131,7 @@ func (h *CRUDHandler[T, ID]) FindPage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		offset, err = strconv.Atoi(offsetStr)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			utils.BadRequestResponse(w, r, err)
 			return
 		}
 	}
@@ -134,7 +142,7 @@ func (h *CRUDHandler[T, ID]) FindPage(w http.ResponseWriter, r *http.Request) {
 	} else {
 		limit, err = strconv.Atoi(limitStr)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			utils.BadRequestResponse(w, r, err)
 			return
 		}
 	}
@@ -144,8 +152,8 @@ func (h *CRUDHandler[T, ID]) FindPage(w http.ResponseWriter, r *http.Request) {
 		Offset: new(int64(offset)),
 	})
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.InternalServerError(w, r, err)
 		return
 	}
-	json.NewEncoder(w).Encode(result)
+	utils.WriteJSON(w, http.StatusOK, result)
 }

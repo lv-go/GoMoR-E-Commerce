@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 
-const Message = ({
+export default function Message({
   variant = "info",
   children,
 }: {
   variant?: "success" | "error" | "info";
   children: ReactNode;
-}) => {
+}) {
   const getVariantClass = () => {
     switch (variant) {
       case "success":
@@ -19,6 +19,4 @@ const Message = ({
   };
 
   return <div className={`p-4 rounded ${getVariantClass()}`}>{children}</div>;
-};
-
-export default Message;
+}

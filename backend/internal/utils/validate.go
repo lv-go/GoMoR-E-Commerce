@@ -2,8 +2,12 @@ package utils
 
 import "github.com/go-playground/validator/v10"
 
-var Validate *validator.Validate
+var validate *validator.Validate
 
 func init() {
-	Validate = validator.New(validator.WithRequiredStructEnabled())
+	validate = validator.New(validator.WithRequiredStructEnabled())
+}
+
+func ValidateStruct(s any) error {
+	return validate.Struct(s)
 }

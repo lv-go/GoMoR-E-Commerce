@@ -23,7 +23,7 @@ export default function UserOrders() {
       {isLoading ? (
         <Loader />
       ) : error ? (
-        <Message variant="danger">{error.message}</Message>
+        <Message variant="error">{error.message}</Message>
       ) : (
         <table className="w-full">
           <thead>

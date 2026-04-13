@@ -1,9 +1,8 @@
-import { useSelector } from "react-redux";
+import { getFavoritesFromLocalStorage } from "~/utils/favorites";
 
 export default function FavoritesCount({ className }: { className?: string }) {
-  // const favorites = useSelector((state: any) => state.favorites);
-  // const favoriteCount = favorites.length;
-  const favoriteCount = 5;
+  const favorites = getFavoritesFromLocalStorage();
+  const favoriteCount = favorites.length;
 
   return (
     <div className={className}>

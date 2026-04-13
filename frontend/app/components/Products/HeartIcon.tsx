@@ -1,38 +1,21 @@
-import { useEffect } from "react";
-import { FaHeart, FaRegHeart, FaVaadin } from "react-icons/fa";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  addToFavorites,
-  removeFromFavorites,
-  setFavorites,
-} from "../../redux/features/favorites/favoriteSlice";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
+import { type Product } from "~/schemas/product";
 import {
   addFavoriteToLocalStorage,
   getFavoritesFromLocalStorage,
   removeFavoriteFromLocalStorage,
-} from "../../utils/localStorage";
-import { type Product } from "~/schemas/product";
+} from "~/utils/favorites";
 
 const HeartIcon = ({ product }: { product: Product }) => {
-  const dispatch = useDispatch();
-  const favorites = useSelector((state) => state.favorites) || [];
+  const favorites = getFavoritesFromLocalStorage();
   const isFavorite = favorites.some((p: Product) => p._id === product._id);
 
 
-  useEffect(() => {
-    const favoritesFromLocalStorage = getFavoritesFromLocalStorage();
-    dispatch(setFavorites(favoritesFromLocalStorage));
-  }, []);
-
   const toggleFavorites = () => {
     if (isFavorite) {
-      dispatch(removeFromFavorites(product));
-      // remove the product from the localStorage as well
-      removeFavoriteFromLocalStorage(product._id);
+      removeFavoriteFromLocalStorage(product._id!);
     } else {
-      dispatch(addToFavorites(product));
-      // add the product to localStorage as well
       addFavoriteToLocalStorage(product);
     }
   };

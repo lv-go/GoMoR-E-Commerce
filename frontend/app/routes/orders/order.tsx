@@ -1,4 +1,4 @@
-import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import { DISPATCH_ACTION, PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 import { toast } from "react-toastify";
@@ -13,34 +13,37 @@ import {
   newOrder
 } from "~/hooks/orders";
 
-const Order = () => {
+export default function Order() {
   const { id: orderId } = useParams();
 
   const { data: order = newOrder(), refetch, isLoading, error } = useGetById(orderId || "");
 
-  const { mutate: payOrder, isPending: loadingPay } = usePayOrderMutation();
-  const { mutate: deliverOrder, isPending: loadingDeliver } = useDeliverOrderMutation();
-  const { user: userInfo } = useFirebaseAuth();
+  const { mutateAsync: payOrder, isPending: loadingPay } = usePayOrderMutation();
+  const { mutateAsync: deliverOrder, isPending: loadingDeliver } = useDeliverOrderMutation();
+  const { user } = useFirebaseAuth();
 
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
 
   const {
-    data: paypal,
+    data: paypalClientId,
     isLoading: loadingPaPal,
     error: errorPayPal,
   } = useGetPaypalClientIdQuery();
 
   useEffect(() => {
-    if (!errorPayPal && !loadingPaPal && paypal.clientId) {
+    if (!errorPayPal && !loadingPaPal && paypalClientId) {
       const loadingPaPalScript = async () => {
         paypalDispatch({
-          type: "resetOptions",
+          type: DISPATCH_ACTION.RESET_OPTIONS,
           value: {
-            "client-id": paypal.clientId,
+            "client-id": paypalClientId,
             currency: "USD",
           },
         });
-        paypalDispatch({ type: "setLoadingStatus", value: "pending" });
+        paypalDispatch({
+          type: DISPATCH_ACTION.LOADING_STATUS,
+          value: "pending"
+        });
       };
 
       if (order && !order.isPaid) {
@@ -49,15 +52,15 @@ const Order = () => {
         }
       }
     }
-  }, [errorPayPal, loadingPaPal, order, paypal, paypalDispatch]);
+  }, [errorPayPal, loadingPaPal, order, paypalClientId, paypalDispatch]);
 
-  function onApprove(data, actions) {
-    return actions.order.capture().then(async function (details) {
+  function onApprove(data: any, actions: any) {
+    return actions.order.capture().then(async function (details: any) {
       try {
-        await payOrder({ orderId, details });
+        await payOrder({ id: orderId || "", data });
         refetch();
         toast.success("Order is paid");
-      } catch (error) {
+      } catch (error: any) {
         toast.error(error?.data?.message || error.message);
       }
     });
@@ -85,7 +88,7 @@ const Order = () => {
   return isLoading ? (
     <Loader />
   ) : error ? (
-    <Messsage variant="danger">{error.data.message}</Messsage>
+    <Messsage variant="error">{error.message}</Messsage>
   ) : (
     <div className="container flex flex-col ml-[10rem] md:flex-row">
       <div className="md:w-2/3 pr-4">
@@ -117,13 +120,13 @@ const Order = () => {
                       </td>
 
                       <td className="p-2">
-                        <Link to={`/product/${item.product}`}>{item.name}</Link>
+                        <Link to={`/product/${item.productId}`}>{item.name}</Link>
                       </td>
 
-                      <td className="p-2 text-center">{item.qty}</td>
+                      <td className="p-2 text-center">{item.quantity}</td>
                       <td className="p-2 text-center">{item.price}</td>
                       <td className="p-2 text-center">
-                        $ {(item.qty * item.price).toFixed(2)}
+                        $ {(item.quantity * item.price).toFixed(2)}
                       </td>
                     </tr>
                   ))}
@@ -143,11 +146,11 @@ const Order = () => {
 
           <p className="mb-4">
             <strong className="text-pink-500">Name:</strong>{" "}
-            {order.user.username}
+            {user?.displayName}
           </p>
 
           <p className="mb-4">
-            <strong className="text-pink-500">Email:</strong> {order.user.email}
+            <strong className="text-pink-500">Email:</strong> {user?.email}
           </p>
 
           <p className="mb-4">
@@ -164,7 +167,7 @@ const Order = () => {
           {order.isPaid ? (
             <Messsage variant="success">Paid on {order.paidAt}</Messsage>
           ) : (
-            <Messsage variant="danger">Not paid</Messsage>
+            <Messsage variant="error">Not paid</Messsage>
           )}
         </div>
 
@@ -206,7 +209,7 @@ const Order = () => {
         )}
 
         {loadingDeliver && <Loader />}
-        {userInfo && userInfo.role === "admin" && order.isPaid && !order.isDelivered && (
+        {user && user.role === "admin" && order.isPaid && !order.isDelivered && (
           <div>
             <button
               type="button"
@@ -220,6 +223,4 @@ const Order = () => {
       </div>
     </div>
   );
-};
-
-export default Order;
+}

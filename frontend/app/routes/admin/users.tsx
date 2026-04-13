@@ -1,59 +1,61 @@
 import { useEffect, useState } from "react";
-import { FaTrash, FaEdit, FaCheck, FaTimes } from "react-icons/fa";
-import Message from "../../components/Message";
-import Loader from "../../components/Loader";
-import {
-  useDeleteUserMutation,
-  useGetUsersQuery,
-  useUpdateUserMutation,
-} from "../../redux/api/usersApiSlice";
+import { FaCheck, FaEdit, FaTimes, FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
-// ⚠️⚠️⚠️ don't forget this ⚠️⚠️⚠️⚠️
-// import AdminMenu from "./admin-menu";
+import { useDeleteById, useGetPage, useUpdate } from "~/hooks/users";
+import type { User } from "~/schemas/user";
+import Loader from "../../components/Loader";
+import Message from "../../components/Message";
 
 export default function UserList() {
-  const { data: users, refetch, isLoading, error } = useGetUsersQuery();
+  const { data: usersPage, refetch, isLoading, error } = useGetPage();
+  const users = usersPage?.items || [];
 
-  const [deleteUser] = useDeleteUserMutation();
+  const { mutateAsync: deleteUser } = useDeleteById();
 
-  const [editableUserId, setEditableUserId] = useState(null);
-  const [editableUserName, setEditableUserName] = useState("");
-  const [editableUserEmail, setEditableUserEmail] = useState("");
+  const [editableUserId, setEditableUserId] = useState<string>("");
+  const [editableUserName, setEditableUserName] = useState<string>("");
+  const [editableUserEmail, setEditableUserEmail] = useState<string>("");
 
-  const [updateUser] = useUpdateUserMutation();
+  const { mutateAsync: updateUser } = useUpdate();
 
   useEffect(() => {
     refetch();
   }, [refetch]);
 
-  const deleteHandler = async (id) => {
+  const deleteHandler = async (id: string) => {
     if (window.confirm("Are you sure")) {
       try {
         await deleteUser(id);
         refetch();
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
+      } catch (err: any) {
+        toast.error(err?.message);
       }
     }
   };
 
-  const toggleEdit = (id, username, email) => {
-    setEditableUserId(id);
-    setEditableUserName(username);
-    setEditableUserEmail(email);
+  const toggleEdit = ({
+    _id,
+    username,
+    email,
+  }: Partial<User>) => {
+    setEditableUserId(_id ?? "");
+    setEditableUserName(username ?? "");
+    setEditableUserEmail(email ?? "");
   };
 
-  const updateHandler = async (id) => {
+  const updateHandler = async (id: string) => {
     try {
       await updateUser({
-        userId: id,
-        username: editableUserName,
-        email: editableUserEmail,
+        id,
+        data: {
+          username: editableUserName,
+          email: editableUserEmail,
+        },
       });
-      setEditableUserId(null);
+      setEditableUserId("");
       refetch();
-    } catch (err) {
-      toast.error(err?.data?.message || err.error);
+    } catch (err: any) {
+      toast.error(err?.message);
     }
   };
 
@@ -63,9 +65,7 @@ export default function UserList() {
       {isLoading ? (
         <Loader />
       ) : error ? (
-        <Message variant="danger">
-          {error?.data?.message || error.error}
-        </Message>
+        <Message variant="error">{error?.message}</Message>
       ) : (
         <div className="flex flex-col md:flex-row">
           {/* <AdminMenu /> */}
@@ -93,7 +93,7 @@ export default function UserList() {
                           className="w-full p-2 border rounded-lg"
                         />
                         <button
-                          onClick={() => updateHandler(user._id)}
+                          onClick={() => updateHandler(user._id || "")}
                           className="ml-2 bg-blue-500 text-white py-2 px-4 rounded-lg"
                         >
                           <FaCheck />
@@ -104,7 +104,7 @@ export default function UserList() {
                         {user.username}{" "}
                         <button
                           onClick={() =>
-                            toggleEdit(user._id, user.username, user.email)
+                            toggleEdit(user)
                           }
                         >
                           <FaEdit className="ml-[1rem]" />
@@ -122,7 +122,7 @@ export default function UserList() {
                           className="w-full p-2 border rounded-lg"
                         />
                         <button
-                          onClick={() => updateHandler(user._id)}
+                          onClick={() => updateHandler(user._id ?? "")}
                           className="ml-2 bg-blue-500 text-white py-2 px-4 rounded-lg"
                         >
                           <FaCheck />
@@ -133,7 +133,7 @@ export default function UserList() {
                         <a href={`mailto:${user.email}`}>{user.email}</a>{" "}
                         <button
                           onClick={() =>
-                            toggleEdit(user._id, user.name, user.email)
+                            toggleEdit(user)
                           }
                         >
                           <FaEdit className="ml-[1rem]" />
@@ -152,7 +152,7 @@ export default function UserList() {
                     {!user.isAdmin && (
                       <div className="flex">
                         <button
-                          onClick={() => deleteHandler(user._id)}
+                          onClick={() => deleteHandler(user._id ?? "")}
                           className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                         >
                           <FaTrash />

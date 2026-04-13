@@ -1,15 +1,12 @@
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { updateEmail, updatePassword, updateProfile } from "firebase/auth";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
 import z from "zod";
 import { useFirebaseAuth } from "~/FirebaseAuthContext";
-import Loader from "../../components/Loader";
-import { useProfileMutation } from "../../redux/api/usersApiSlice";
-import { updateEmail, updatePassword, updateProfile } from "firebase/auth";
 
 const ProfileSchema = z.object({
   displayName: z.string().min(3, "Username must be at least 3 characters long"),

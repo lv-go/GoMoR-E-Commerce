@@ -1,8 +1,7 @@
-import { useEffect, useState, type SubmitEvent } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState, type SubmitEvent } from "react";
 import { useNavigate } from "react-router";
-import ProgressSteps from "../../components/ProgressSteps";
 import { getCart, savePaymentMethod, saveShippingAddress } from "~/utils/cartUtils";
+import ProgressSteps from "../../components/ProgressSteps";
 import type { Route } from "./+types/shipping";
 
 export function meta() {
@@ -27,7 +26,6 @@ export default function Shipping({ loaderData: cart }: Route.ComponentProps) {
   );
   const [country, setCountry] = useState(shippingAddress.country || "");
 
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const submitHandler = (e: SubmitEvent) => {

@@ -1,19 +1,20 @@
-import Message from "../../components/Message";
-import Loader from "../../components/Loader";
 import { Link } from "react-router";
-import { useGetOrdersQuery } from "../../redux/api/orderApiSlice";
+import { useGetPage } from "~/hooks/orders";
 import AdminMenu from "../../components/Admin/AdminMenu";
+import Loader from "../../components/Loader";
+import Message from "../../components/Message";
 
 export default function OrderList() {
-  const { data: orders, isLoading, error } = useGetOrdersQuery();
+  const { data: ordersPage, isLoading, error } = useGetPage();
+  const orders = ordersPage?.items ?? [];
 
   return (
     <>
       {isLoading ? (
         <Loader />
       ) : error ? (
-        <Message variant="danger">
-          {error?.data?.message || error.error}
+        <Message variant="error">
+          {error?.message}
         </Message>
       ) : (
         <table className="container mx-auto">
@@ -77,8 +78,8 @@ export default function OrderList() {
                 </td>
 
                 <td>
-                  <Link to={`/order/${order._id}`}>
-                    <button>More</button>
+                  <Link to={`/order/${order._id}`} className="btn btn-primary">
+                    More
                   </Link>
                 </td>
               </tr>
