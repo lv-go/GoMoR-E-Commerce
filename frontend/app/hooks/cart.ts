@@ -14,6 +14,15 @@ function getCart(): Cart {
 };
 
 function setCart(cart: Cart) {
+  const itemsPrice = cart.cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const shippingPrice = itemsPrice > 100 ? 0 : 10;
+  const taxPrice = 0.15 * itemsPrice;
+  const totalPrice = itemsPrice + shippingPrice + taxPrice;
+  cart.itemsPrice = itemsPrice;
+  cart.shippingPrice = shippingPrice;
+  cart.taxPrice = taxPrice;
+  cart.totalPrice = totalPrice;
+
   sessionStorage.setItem("cart", JSON.stringify(cart));
   queryClient.invalidateQueries({ queryKey: ["cart"] });
 };

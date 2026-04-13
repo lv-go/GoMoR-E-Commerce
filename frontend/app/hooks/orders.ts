@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchWithAuth } from "../utils/api";
+import { fetchWithAuth } from "../utils/fetch-with-auth";
 import { type Order } from "../schemas/order";
-import { type Page } from "../schemas/api";
+import { type Page, type PageRequest } from "../schemas/api";
 
-export function useGetPage(offset: number = 0, limit: number = 10) {
+export function useGetPage(params: PageRequest) {
   return useQuery<Page<Order>>({
-    queryKey: ["orders", "page", { offset, limit }],
-    queryFn: () => fetchWithAuth(`/orders?offset=${offset}&limit=${limit}`),
+    queryKey: ["orders", "page", JSON.stringify(params)],
+    queryFn: () => fetchWithAuth(`/orders`, params),
   });
 }
 
@@ -127,11 +127,7 @@ export function useDeliverOrderMutation() {
 export function newOrder(): Order {
   return {
     _id: "",
-    user: {
-      _id: "",
-      username: "",
-      email: "",
-    },
+    userId: "",
     orderItems: [],
     shippingAddress: {
       address: "",

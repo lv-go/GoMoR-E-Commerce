@@ -45,12 +45,13 @@ func Setup(ctx context.Context) http.Handler {
 	apiMux.HandleFunc(http.MethodGet+" /users/{id}", authMiddleware.IsAdmin(userHandler.FindById))
 	apiMux.HandleFunc(http.MethodGet+" /users", authMiddleware.IsAdmin(userHandler.FindPage))
 
-	productHandler := handlers.NewCRUDHandler(productRepo)
+	productHandler := handlers.NewProductHandler(productRepo, db)
 	apiMux.HandleFunc(http.MethodPost+" /products", authMiddleware.IsAdmin(productHandler.Create))
 	apiMux.HandleFunc(http.MethodPut+" /products/{id}", authMiddleware.IsAdmin(productHandler.Update))
 	apiMux.HandleFunc(http.MethodDelete+" /products/{id}", authMiddleware.IsAdmin(productHandler.DeleteById))
 	apiMux.HandleFunc(http.MethodGet+" /products/{id}", productHandler.FindById)
 	apiMux.HandleFunc(http.MethodGet+" /products", productHandler.FindPage)
+	apiMux.HandleFunc(http.MethodGet+" /products/brands", productHandler.GetBrands)
 
 	categoryHandler := handlers.NewCRUDHandler(categoryRepo)
 	apiMux.HandleFunc(http.MethodPost+" /categories", authMiddleware.IsAdmin(categoryHandler.Create))

@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchWithAuth } from "../utils/api";
+import { fetchWithAuth } from "../utils/fetch-with-auth";
 import { type User } from "../schemas/user";
-import { type Page } from "../schemas/api";
+import { type Page, type PageRequest } from "../schemas/api";
 
-export function useGetPage({ offset = 0, limit = 10, ids_in }: { offset?: number; limit?: number; ids_in?: string[] }) {
+export function useGetPage(params: PageRequest & { ids_in?: string[] }) {
   return useQuery<Page<User>>({
-    queryKey: ["users", "page", { offset, limit, ids_in }],
-    queryFn: () => fetchWithAuth(`/users`, { offset, limit, ids_in }),
+    queryKey: ["users", "page", JSON.stringify(params)],
+    queryFn: () => fetchWithAuth(`/users`, params),
   });
 }
 

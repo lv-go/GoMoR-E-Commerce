@@ -1,10 +1,9 @@
-import { Link } from "react-router";
 import { AiOutlineShoppingCart } from "react-icons/ai";
-import { useDispatch } from "react-redux";
-import { toast } from "react-toastify";
-import HeartIcon from "./HeartIcon";
-import { type Product } from "~/schemas/product";
+import { Link } from "react-router";
+import { toast } from "react-hot-toast";
 import { useAddToCart } from "~/hooks/cart";
+import { type Product } from "~/schemas/product";
+import HeartIcon from "./HeartIcon";
 
 export default function ProductCard({ p }: { p: Product }) {
   const { mutate: addToCart } = useAddToCart();
@@ -13,12 +12,11 @@ export default function ProductCard({ p }: { p: Product }) {
     addToCart({ product, quantity });
     toast.success("Item added successfully", {
       position: "top-right",
-      autoClose: 2000,
     });
   };
 
   return (
-    <div className="max-w-sm relative bg-[#1A1A1A] rounded-lg shaodw dark:bg-gray-800 dark:border-gray-700">
+    <div className="max-w-sm relative bg-base-300 rounded-lg shaodw dark:bg-gray-800 dark:border-gray-700">
       <section className="relative">
         <Link to={`/product/${p._id}`}>
           <span className="absolute bottom-3 right-3 bg-pink-100 text-pink-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-pink-900 dark:text-pink-300">
@@ -46,7 +44,7 @@ export default function ProductCard({ p }: { p: Product }) {
           </p>
         </div>
 
-        <p className="mb-3 font-normal text-[#CFCFCF]">
+        <p className="mb-3 font-normal text-base-content">
           {p?.description?.substring(0, 60)} ...
         </p>
 

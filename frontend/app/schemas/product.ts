@@ -39,7 +39,7 @@ export const newProduct = (): Product => ({
 export const getId = (item: Product) => item._id || "";
 
 export type ProductFilters = {
-  category?: string;
+  category?: string[];
   price?: string;
   brand?: string;
 };

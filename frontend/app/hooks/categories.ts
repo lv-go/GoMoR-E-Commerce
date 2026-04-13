@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchWithAuth } from "../utils/api";
+import { fetchWithAuth } from "../utils/fetch-with-auth";
 import { type Category } from "../schemas/category";
 import { type Page, type PageRequest } from "../schemas/api";
 
-export function useGetPage({ offset = 0, limit = 10 } = {} as PageRequest) {
+export function useGetPage(params: PageRequest = {}) {
   return useQuery<Page<Category>>({
-    queryKey: ["categories", "page", { offset, limit }],
-    queryFn: () => fetchWithAuth(`/categories?offset=${offset}&limit=${limit}`),
+    queryKey: ["categories", "page", JSON.stringify(params)],
+    queryFn: () => fetchWithAuth(`/categories`, params),
   });
 }
 

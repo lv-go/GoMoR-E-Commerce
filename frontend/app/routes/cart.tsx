@@ -81,7 +81,7 @@ export default function Cart() {
               <div className="mt-8 w-[40rem]">
                 <div className="p-4 rounded-lg">
                   <h2 className="text-xl font-semibold mb-2">
-                    Items ({cartItems.reduce((acc: number, item: CartItem) => acc + item.quantity, 0)})
+                    Items ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})
                   </h2>
 
                   <div className="text-2xl font-bold">

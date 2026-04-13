@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchWithAuth } from "../utils/api";
+import { fetchWithAuth } from "../utils/fetch-with-auth";
 import { type Product, type ProductFilters } from "../schemas/product";
 import { type Page, type PageRequest } from "../schemas/api";
 
@@ -7,19 +7,10 @@ export function useGetTopProducts() {
   return useGetPage({ offset: 0, limit: 10, sort: "rating", order: "desc" });
 }
 
-export function useGetPage({ offset, limit, sort, order, search, category, price }: PageRequest & ProductFilters) {
-  const params = new URLSearchParams();
-  if (offset) params.set("offset", offset.toString());
-  if (limit) params.set("limit", limit.toString());
-  if (sort) params.set("sort", sort);
-  if (order) params.set("order", order);
-  if (search) params.set("search", search);
-  if (category) params.set("category", category);
-  if (price) params.set("price", price);
-
+export function useGetPage(params: PageRequest & ProductFilters) {
   return useQuery<Page<Product>>({
-    queryKey: ["products", "page", { offset, limit, sort, order, search, category, price }],
-    queryFn: () => fetchWithAuth(`/products?${params.toString()}`),
+    queryKey: ["products", "page", JSON.stringify(params)],
+    queryFn: () => fetchWithAuth(`/products`, params),
   });
 }
 
@@ -85,8 +76,15 @@ export function useCreateReview() {
         method: "POST",
         body: JSON.stringify({ rating, comment }),
       }),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ["product", id] });
+    onSuccess: (_, { productId }) => {
+      queryClient.invalidateQueries({ queryKey: ["product", productId] });
     },
+  });
+}
+
+export function useGetBrands() {
+  return useQuery<string[]>({
+    queryKey: ["products", "brands"],
+    queryFn: () => fetchWithAuth(`/products/brands`),
   });
 }

@@ -49,3 +49,8 @@ assert.ok(body.totalPages >= 0)
 assert.ok(body.items?.length >= 0)
 
 }}
+
+### Get products brands without auth token should return 200
+GET http://localhost:8080/api/products/brands
+
+?? status == 200
