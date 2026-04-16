@@ -17,11 +17,11 @@ func TestUserHooks(t *testing.T) {
 	}
 
 	repository.BeforeCreate[string](model)
-	assert.NotNil(t, model.CreatedAt)
-	assert.NotNil(t, model.UpdatedAt)
+	assert.NotNil(t, model.Auditable.CreatedAt)
+	assert.NotNil(t, model.Auditable.UpdatedAt)
 
 	repository.BeforeUpdate[string](model)
-	assert.NotNil(t, model.UpdatedAt)
+	assert.NotNil(t, model.Auditable.UpdatedAt)
 }
 
 func TestCategoryHooks(t *testing.T) {
@@ -30,11 +30,11 @@ func TestCategoryHooks(t *testing.T) {
 	}
 
 	repository.BeforeCreate[string](model)
-	assert.NotNil(t, model.CreatedAt)
-	assert.NotNil(t, model.UpdatedAt)
+	assert.NotNil(t, model.Auditable.CreatedAt)
+	assert.NotNil(t, model.Auditable.UpdatedAt)
 
 	repository.BeforeUpdate[string](model)
-	assert.NotNil(t, model.UpdatedAt)
+	assert.NotNil(t, model.Auditable.UpdatedAt)
 }
 
 func TestProductHooks(t *testing.T) {
@@ -45,9 +45,9 @@ func TestProductHooks(t *testing.T) {
 	}
 
 	repository.BeforeCreate[string](model)
-	assert.NotNil(t, model.CreatedAt)
-	assert.NotNil(t, model.UpdatedAt)
+	assert.NotNil(t, model.Auditable.CreatedAt)
+	assert.NotNil(t, model.Auditable.UpdatedAt)
 
 	repository.BeforeUpdate[string](model)
-	assert.NotNil(t, model.UpdatedAt)
+	assert.NotNil(t, model.Auditable.UpdatedAt)
 }

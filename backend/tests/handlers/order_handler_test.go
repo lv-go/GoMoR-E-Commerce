@@ -113,12 +113,12 @@ func TestOrderHandler(t *testing.T) {
 		assert.Equal(t, order.TotalPrice, createdOrder.TotalPrice)
 		assert.NotNil(t, createdOrder.ID)
 		assert.NotEqual(t, primitive.NilObjectID, createdOrder.ID)
-		assert.NotNil(t, createdOrder.CreatedAt)
-		assert.NotNil(t, createdOrder.UpdatedAt)
+		assert.NotNil(t, createdOrder.Auditable.CreatedAt)
+		assert.NotNil(t, createdOrder.Auditable.UpdatedAt)
 
 		order.ID = createdOrder.ID
-		order.CreatedAt = createdOrder.CreatedAt
-		order.UpdatedAt = createdOrder.UpdatedAt
+		order.Auditable.CreatedAt = createdOrder.Auditable.CreatedAt
+		order.Auditable.UpdatedAt = createdOrder.Auditable.UpdatedAt
 	})
 
 	t.Run("FindById", func(t *testing.T) {
@@ -151,8 +151,8 @@ func TestOrderHandler(t *testing.T) {
 		assert.Equal(t, order.PaymentMethod, updatedOrder.PaymentMethod)
 		assert.Equal(t, order.ID, updatedOrder.ID)
 
-		assert.GreaterOrEqual(t, order.UpdatedAt.Unix(), updatedOrder.UpdatedAt.Unix())
-		order.UpdatedAt = updatedOrder.UpdatedAt
+		assert.GreaterOrEqual(t, order.Auditable.UpdatedAt.Unix(), updatedOrder.Auditable.UpdatedAt.Unix())
+		order.Auditable.UpdatedAt = updatedOrder.Auditable.UpdatedAt
 	})
 
 	t.Run("FindPage", func(t *testing.T) {
@@ -180,8 +180,8 @@ func TestOrderHandler(t *testing.T) {
 				assert.Equal(t, order.ItemsPrice, item.ItemsPrice)
 				assert.Equal(t, order.IsPaid, item.IsPaid)
 				assert.Equal(t, order.IsDelivered, item.IsDelivered)
-				assert.Equal(t, order.CreatedAt.Unix(), item.CreatedAt.Unix())
-				assert.Equal(t, order.UpdatedAt.Unix(), item.UpdatedAt.Unix())
+				assert.Equal(t, order.Auditable.CreatedAt.Unix(), item.Auditable.CreatedAt.Unix())
+				assert.Equal(t, order.Auditable.UpdatedAt.Unix(), item.Auditable.UpdatedAt.Unix())
 				break
 			}
 		}

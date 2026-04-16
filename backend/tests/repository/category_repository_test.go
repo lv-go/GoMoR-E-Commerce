@@ -36,10 +36,10 @@ func TestCategoryRepository(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, category.Name, foundCategory.Name)
 		assert.Equal(t, category.ID, foundCategory.ID)
-		assert.NotNil(t, foundCategory.CreatedAt)
-		assert.NotNil(t, foundCategory.UpdatedAt)
-		assert.Equal(t, foundCategory.CreatedAt.Unix(), category.CreatedAt.Unix())
-		assert.Equal(t, foundCategory.UpdatedAt.Unix(), category.UpdatedAt.Unix())
+		assert.NotNil(t, foundCategory.Auditable.CreatedAt)
+		assert.NotNil(t, foundCategory.Auditable.UpdatedAt)
+		assert.Equal(t, foundCategory.Auditable.CreatedAt.Unix(), category.Auditable.CreatedAt.Unix())
+		assert.Equal(t, foundCategory.Auditable.UpdatedAt.Unix(), category.Auditable.UpdatedAt.Unix())
 	})
 
 	// Test Update
@@ -48,8 +48,8 @@ func TestCategoryRepository(t *testing.T) {
 		err = repo.Update(t.Context(), foundCategory)
 		assert.NoError(t, err)
 		assert.Equal(t, "Electronics Updated", foundCategory.Name)
-		assert.NotNil(t, foundCategory.UpdatedAt)
-		assert.Equal(t, foundCategory.UpdatedAt.Unix(), category.UpdatedAt.Unix())
+		assert.NotNil(t, foundCategory.Auditable.UpdatedAt)
+		assert.Equal(t, foundCategory.Auditable.UpdatedAt.Unix(), category.Auditable.UpdatedAt.Unix())
 	})
 
 	// Test FindById after update
@@ -57,8 +57,8 @@ func TestCategoryRepository(t *testing.T) {
 		foundCategory, err = repo.FindById(t.Context(), *category.ID)
 		assert.NoError(t, err)
 		assert.Equal(t, "Electronics Updated", foundCategory.Name)
-		assert.NotNil(t, foundCategory.UpdatedAt)
-		assert.Equal(t, foundCategory.UpdatedAt.Unix(), category.UpdatedAt.Unix())
+		assert.NotNil(t, foundCategory.Auditable.UpdatedAt)
+		assert.Equal(t, foundCategory.Auditable.UpdatedAt.Unix(), category.Auditable.UpdatedAt.Unix())
 	})
 
 	// Test Delete

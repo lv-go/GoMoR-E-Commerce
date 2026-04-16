@@ -35,6 +35,8 @@ type CRUDRepository[T any, ID comparable] interface {
 	FindMany(ctx context.Context, filter any, opts ...ManyOpts) (*[]T, error)
 	/// Find page of entities of type T
 	FindPage(ctx context.Context, filter any, opts ...ManyOpts) (*Page[T], error)
+	/// Get distinct values of a field
+	Distinct(ctx context.Context, field string, filter any, opts ...ManyOpts) ([]any, error)
 }
 
 type SortDirection string

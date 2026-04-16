@@ -50,12 +50,12 @@ func TestProductHandler(t *testing.T) {
 		assert.Equal(t, product.Price, createdProduct.Price)
 		assert.NotNil(t, createdProduct.ID)
 		assert.NotEqual(t, primitive.NilObjectID, createdProduct.ID)
-		assert.NotNil(t, createdProduct.CreatedAt)
-		assert.NotNil(t, createdProduct.UpdatedAt)
+		assert.NotNil(t, createdProduct.Auditable.CreatedAt)
+		assert.NotNil(t, createdProduct.Auditable.UpdatedAt)
 
 		product.ID = createdProduct.ID
-		product.CreatedAt = createdProduct.CreatedAt
-		product.UpdatedAt = createdProduct.UpdatedAt
+		product.Auditable.CreatedAt = createdProduct.Auditable.CreatedAt
+		product.Auditable.UpdatedAt = createdProduct.Auditable.UpdatedAt
 	})
 
 	t.Run("FindById", func(t *testing.T) {
@@ -106,8 +106,8 @@ func TestProductHandler(t *testing.T) {
 				assert.Equal(t, product.Description, item.Description)
 				assert.Equal(t, product.Price, item.Price)
 				assert.Equal(t, product.CountInStock, item.CountInStock)
-				assert.Equal(t, product.CreatedAt.Unix(), item.CreatedAt.Unix())
-				assert.Equal(t, product.UpdatedAt.Unix(), item.UpdatedAt.Unix())
+				assert.Equal(t, product.Auditable.CreatedAt.Unix(), item.Auditable.CreatedAt.Unix())
+				assert.Equal(t, product.Auditable.UpdatedAt.Unix(), item.Auditable.UpdatedAt.Unix())
 				break
 			}
 		}

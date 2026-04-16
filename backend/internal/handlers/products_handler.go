@@ -10,27 +10,23 @@ import (
 	"strings"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ProductHandler struct {
 	CRUDHandler[models.Product, primitive.ObjectID]
-	db *mongo.Database
 }
 
 func NewProductHandler(
 	repo repository.CRUDRepository[models.Product, primitive.ObjectID],
-	db *mongo.Database,
 ) *ProductHandler {
 	return &ProductHandler{
 		CRUDHandler: *NewCRUDHandler(repo),
-		db:          db,
 	}
 }
 
 func (h *ProductHandler) GetBrands(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("ProductHandler.GetBrands", "path", r.URL.Path)
-	brands, err := h.db.Collection("products").Distinct(r.Context(), "brand", map[string]any{})
+	brands, err := h.repo.Distinct(r.Context(), "brand", map[string]any{})
 	if err != nil {
 		utils.InternalServerError(w, r, err)
 		return

@@ -52,12 +52,12 @@ func TestUserHandler(t *testing.T) {
 		assert.Equal(t, user.IsActive, createdUser.IsActive)
 		assert.Equal(t, user.Role, createdUser.Role)
 		assert.Equal(t, userId, createdUser.ID)
-		assert.NotNil(t, createdUser.CreatedAt)
-		assert.NotNil(t, createdUser.UpdatedAt)
+		assert.NotNil(t, createdUser.Auditable.CreatedAt)
+		assert.NotNil(t, createdUser.Auditable.UpdatedAt)
 
 		user.ID = createdUser.ID
-		user.CreatedAt = createdUser.CreatedAt
-		user.UpdatedAt = createdUser.UpdatedAt
+		user.Auditable.CreatedAt = createdUser.Auditable.CreatedAt
+		user.Auditable.UpdatedAt = createdUser.Auditable.UpdatedAt
 	})
 
 	t.Run("FindById", func(t *testing.T) {
@@ -107,8 +107,8 @@ func TestUserHandler(t *testing.T) {
 				assert.Equal(t, user.Email, item.Email)
 				assert.Equal(t, user.IsActive, item.IsActive)
 				assert.Equal(t, user.Role, item.Role)
-				assert.Equal(t, user.CreatedAt.Unix(), item.CreatedAt.Unix())
-				assert.Equal(t, user.UpdatedAt.Unix(), item.UpdatedAt.Unix())
+				assert.Equal(t, user.Auditable.CreatedAt.Unix(), item.Auditable.CreatedAt.Unix())
+				assert.Equal(t, user.Auditable.UpdatedAt.Unix(), item.Auditable.UpdatedAt.Unix())
 				break
 			}
 		}

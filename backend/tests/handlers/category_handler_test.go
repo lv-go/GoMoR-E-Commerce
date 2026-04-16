@@ -45,11 +45,11 @@ func TestCategoryHandler(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, category.Name, createdCategory.Name)
 		assert.NotNil(t, createdCategory.ID)
-		assert.NotNil(t, createdCategory.UpdatedAt)
-		assert.NotNil(t, createdCategory.CreatedAt)
+		assert.NotNil(t, createdCategory.Auditable.UpdatedAt)
+		assert.NotNil(t, createdCategory.Auditable.CreatedAt)
 		category.ID = createdCategory.ID
-		category.UpdatedAt = createdCategory.UpdatedAt
-		category.CreatedAt = createdCategory.CreatedAt
+		category.Auditable.UpdatedAt = createdCategory.Auditable.UpdatedAt
+		category.Auditable.CreatedAt = createdCategory.Auditable.CreatedAt
 	})
 
 	t.Run("FindById", func(t *testing.T) {
@@ -98,8 +98,8 @@ func TestCategoryHandler(t *testing.T) {
 				found = true
 				assert.Equal(t, category.Name, item.Name)
 				assert.Equal(t, category.ID, item.ID)
-				assert.Equal(t, category.UpdatedAt.Unix(), item.UpdatedAt.Unix())
-				assert.Equal(t, category.CreatedAt.Unix(), item.CreatedAt.Unix())
+				assert.Equal(t, category.Auditable.UpdatedAt.Unix(), item.Auditable.UpdatedAt.Unix())
+				assert.Equal(t, category.Auditable.CreatedAt.Unix(), item.Auditable.CreatedAt.Unix())
 				break
 			}
 		}

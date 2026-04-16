@@ -228,3 +228,7 @@ func (r *mongoCRUDRepository[T, ID]) FindPage(ctx context.Context, filter any, o
 		TotalPages: totalPages,
 	}, nil
 }
+
+func (r *mongoCRUDRepository[T, ID]) Distinct(ctx context.Context, field string, filter any, opts ...ManyOpts) ([]any, error) {
+	return r.collection.Distinct(ctx, field, filter)
+}
