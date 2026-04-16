@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaCheck, FaEdit, FaTimes, FaTrash } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useDeleteById, useGetPage, useUpdate } from "~/hooks/users";
 import type { User } from "~/schemas/user";
 import Loader from "../../components/Loader";

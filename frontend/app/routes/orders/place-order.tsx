@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import { useCreate } from "~/hooks/orders";
 import Loader from "../../components/Loader";
 import Message from "../../components/Message";

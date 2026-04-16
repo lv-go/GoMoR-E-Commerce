@@ -8,7 +8,7 @@ import {
   FaStore,
 } from "react-icons/fa";
 import { Link, useNavigate, useParams } from "react-router";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import Loader from "~/components/Loader";
 import Message from "~/components/Message";
 import HeartIcon from "~/components/Products/HeartIcon";

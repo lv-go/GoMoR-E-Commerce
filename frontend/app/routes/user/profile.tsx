@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateEmail, updatePassword, updateProfile } from "firebase/auth";
