@@ -4,9 +4,11 @@ import { type User } from "../schemas/user";
 import { type Page, type PageRequest } from "../schemas/api";
 
 export function useGetPage(params: PageRequest & { ids_in?: string[] }) {
+  const enabled = !!params?.ids_in && params.ids_in.length > 0;
   return useQuery<Page<User>>({
     queryKey: ["users", "page", JSON.stringify(params)],
     queryFn: () => fetchWithAuth(`/users`, { params }),
+    enabled,
   });
 }
 
