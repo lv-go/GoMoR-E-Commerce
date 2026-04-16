@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"strconv"
 )
 
 type OrderHandler struct {
@@ -80,6 +81,20 @@ func (h *OrderHandler) FindPage(w http.ResponseWriter, r *http.Request) {
 
 	slog.Debug("OrderHandler.FindPage", "filter", filter)
 
+	var limit int64 = 10
+	var offset int64 = 0
+
+	if l := r.URL.Query().Get("limit"); l != "" {
+		if val, err := strconv.ParseInt(l, 10, 64); err == nil {
+			limit = val
+		}
+	}
+	if o := r.URL.Query().Get("offset"); o != "" {
+		if val, err := strconv.ParseInt(o, 10, 64); err == nil {
+			offset = val
+		}
+	}
+
 	sortBy := []repository.SortBy{{
 		Field:     "createdAt",
 		Direction: repository.SortDirection_Descending,
@@ -87,6 +102,8 @@ func (h *OrderHandler) FindPage(w http.ResponseWriter, r *http.Request) {
 
 	orders, err := h.orderRepo.FindPage(r.Context(), filter, repository.ManyOpts{
 		SortBy: &sortBy,
+		Limit:  &limit,
+		Offset: &offset,
 	})
 	if err != nil {
 		utils.InternalServerError(w, r, err)

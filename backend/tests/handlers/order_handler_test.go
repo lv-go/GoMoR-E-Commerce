@@ -80,7 +80,7 @@ func TestOrderHandler(t *testing.T) {
 			Category:     primitive.NewObjectID(),
 			Description:  "Test Description",
 		}
-		productRepo.Create(context.Background(), product)
+		productRepo.Create(t.Context(), product)
 	}
 
 	order := &models.Order{
@@ -165,10 +165,10 @@ func TestOrderHandler(t *testing.T) {
 		var page repository.Page[models.Order]
 		err := json.NewDecoder(rr.Body).Decode(&page)
 		assert.NoError(t, err)
-		assert.LessOrEqual(t, int64(1), page.Total)
-		assert.LessOrEqual(t, int32(1), page.Size)
-		assert.LessOrEqual(t, int32(1), page.TotalPages)
-		assert.LessOrEqual(t, 1, len(page.Items))
+		assert.GreaterOrEqual(t, page.Total, int64(1))
+		assert.GreaterOrEqual(t, page.Size, int32(1))
+		assert.GreaterOrEqual(t, page.TotalPages, int32(1))
+		assert.GreaterOrEqual(t, len(page.Items), 1)
 		found := false
 		for _, item := range page.Items {
 			if item.ID != nil && item.ID.Hex() == order.ID.Hex() {
