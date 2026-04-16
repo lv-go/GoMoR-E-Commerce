@@ -41,14 +41,16 @@ export default function UserOrders() {
           <tbody>
             {orders.map((order) => (
               <tr key={order._id}>
-                <img
-                  src={order.orderItems[0].image}
-                  alt={order.user}
-                  className="w-[6rem] mb-5"
-                />
+                <td>
+                  <img
+                    src={order.orderItems[0].image}
+                    alt={order.orderItems[0].name}
+                    className="w-[6rem] mb-5"
+                  />
+                </td>
 
                 <td className="py-2">{order._id}</td>
-                <td className="py-2">{order.createdAt.substring(0, 10)}</td>
+                <td className="py-2">{order.createdAt?.substring(0, 10)}</td>
                 <td className="py-2">$ {order.totalPrice}</td>
 
                 <td className="py-2">

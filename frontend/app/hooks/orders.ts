@@ -3,7 +3,7 @@ import { fetchWithAuth } from "../utils/fetch-with-auth";
 import { type Order } from "../schemas/order";
 import { type Page, type PageRequest } from "../schemas/api";
 
-export function useGetPage(params: PageRequest) {
+export function useGetPage(params?: PageRequest) {
   return useQuery<Page<Order>>({
     queryKey: ["orders", "page", JSON.stringify(params)],
     queryFn: () => fetchWithAuth(`/orders`, { params }),
@@ -111,13 +111,12 @@ export function usePayOrderMutation() {
 export function useDeliverOrderMutation() {
   const queryClient = useQueryClient();
 
-  return useMutation<Order, Error, { id: string; data: Partial<Order> }>({
-    mutationFn: ({ id, data }) =>
+  return useMutation<Order, Error, string>({
+    mutationFn: (id) =>
       fetchWithAuth(`/orders/${id}/deliver`, {
-        method: "PUT",
-        body: JSON.stringify(data),
+        method: "PUT"
       }),
-    onSuccess: (_, { id }) => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       queryClient.invalidateQueries({ queryKey: ["order", id] });
     },

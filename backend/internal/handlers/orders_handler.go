@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"errors"
 	"gomor-e-commerce/internal/auth"
 	"gomor-e-commerce/internal/models"
 	"gomor-e-commerce/internal/repository"
 	"gomor-e-commerce/internal/utils"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -30,7 +32,7 @@ func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var order models.Order
 	err := utils.ReadJSON(w, r, &order)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.BadRequestResponse(w, r, err)
 		return
 	}
 
@@ -41,8 +43,7 @@ func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	for _, item := range order.OrderItems {
 		product, err := h.productRepo.FindById(r.Context(), item.ProductID)
 		if err != nil {
-			slog.Error("Error finding product", "error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			utils.InternalServerError(w, r, err)
 			return
 		}
 		order.ItemsPrice += product.Price * float64(item.Quantity)
@@ -59,8 +60,7 @@ func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = h.orderRepo.Create(r.Context(), &order)
 	if err != nil {
-		slog.Error("Error creating order", "error", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.InternalServerError(w, r, err)
 		return
 	}
 	utils.WriteJSON(w, http.StatusCreated, &order)
@@ -89,10 +89,76 @@ func (h *OrderHandler) FindPage(w http.ResponseWriter, r *http.Request) {
 		SortBy: &sortBy,
 	})
 	if err != nil {
-		slog.Error("Error finding orders", "error", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		utils.InternalServerError(w, r, err)
 		return
 	}
 
 	utils.WriteJSON(w, http.StatusOK, orders)
+}
+
+func (h *OrderHandler) Pay(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("OrderHandler.Pay", "path", r.URL.Path)
+	orderIdStr := r.PathValue("id")
+	orderId, err := primitive.ObjectIDFromHex(orderIdStr)
+	if err != nil {
+		utils.BadRequestResponse(w, r, err)
+		return
+	}
+
+	order, err := h.orderRepo.FindById(r.Context(), orderId)
+	if err != nil {
+		utils.InternalServerError(w, r, err)
+		return
+	}
+
+	var orderUpdate models.Order
+	err = utils.ReadJSON(w, r, &orderUpdate)
+	if err != nil {
+		utils.BadRequestResponse(w, r, err)
+		return
+	}
+
+	order.IsPaid = true
+	order.PaidAt = time.Now()
+	order.PaymentResult = models.PaymentResult{
+		ID:           orderUpdate.PaymentResult.ID,
+		Status:       orderUpdate.PaymentResult.Status,
+		UpdateTime:   orderUpdate.PaymentResult.UpdateTime,
+		EmailAddress: orderUpdate.PaymentResult.EmailAddress,
+	}
+
+	err = h.orderRepo.Update(r.Context(), order)
+	if err != nil {
+		utils.InternalServerError(w, r, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, order)
+}
+
+func (h *OrderHandler) Deliver(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("OrderHandler.Deliver", "path", r.URL.Path)
+	orderIdStr := r.PathValue("id")
+	orderId, err := primitive.ObjectIDFromHex(orderIdStr)
+	if err != nil {
+		utils.BadRequestResponse(w, r, errors.New("Invalid order ID"))
+		return
+	}
+
+	order, err := h.orderRepo.FindById(r.Context(), orderId)
+	if err != nil {
+		utils.InternalServerError(w, r, err)
+		return
+	}
+
+	order.IsDelivered = true
+	order.DeliveredAt = time.Now()
+
+	err = h.orderRepo.Update(r.Context(), order)
+	if err != nil {
+		utils.InternalServerError(w, r, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, order)
 }

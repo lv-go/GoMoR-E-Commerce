@@ -145,7 +145,7 @@ export default function Navigation() {
 
           {user.role !== "admin" && (
             <li>
-              <Link to="/user-orders" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Orders">
+              <Link to="/user/orders" className="is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Orders">
                 <FaBriefcase className="my-1.5 inline-block size-4" />
                 <span className="is-drawer-close:hidden">Orders</span>
               </Link>

@@ -1,4 +1,5 @@
 import { DISPATCH_ACTION, PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+import type { CreateOrderData, CreateOrderActions, OnApproveData, OnApproveActions } from "@paypal/paypal-js";
 import { useEffect } from "react";
 import { Link, useParams } from "react-router";
 import { toast } from "react-hot-toast";
@@ -8,7 +9,7 @@ import { useFirebaseAuth } from "~/FirebaseAuthContext";
 import {
   useGetById,
   useDeliverOrderMutation,
-  useGetPaypalClientIdQuery,
+  // useGetPaypalClientIdQuery,
   usePayOrderMutation,
   newOrder
 } from "~/hooks/orders";
@@ -22,66 +23,51 @@ export default function Order() {
   const { mutateAsync: deliverOrder, isPending: loadingDeliver } = useDeliverOrderMutation();
   const { user } = useFirebaseAuth();
 
-  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
+  const [{ isPending }] = usePayPalScriptReducer();
 
-  const {
-    data: paypalClientId,
-    isLoading: loadingPaPal,
-    error: errorPayPal,
-  } = useGetPaypalClientIdQuery();
-
-  useEffect(() => {
-    if (!errorPayPal && !loadingPaPal && paypalClientId) {
-      const loadingPaPalScript = async () => {
-        paypalDispatch({
-          type: DISPATCH_ACTION.RESET_OPTIONS,
-          value: {
-            "client-id": paypalClientId,
-            currency: "USD",
-          },
-        });
-        paypalDispatch({
-          type: DISPATCH_ACTION.LOADING_STATUS,
-          value: "pending"
-        });
-      };
-
-      if (order && !order.isPaid) {
-        if (!window.paypal) {
-          loadingPaPalScript();
+  async function onApprove(data: OnApproveData, actions: OnApproveActions) {
+    const details = await actions.order?.capture()
+    try {
+      await payOrder({
+        id: orderId || "", data: {
+          paymentResult: {
+            id: details?.id,
+            status: details?.status,
+            update_time: details?.update_time,
+            email_address: details?.payer?.email_address,
+          }
         }
-      }
+      });
+      refetch();
+      toast.success("Order is paid");
+    } catch (error: any) {
+      toast.error(error?.data?.message || error.message);
     }
-  }, [errorPayPal, loadingPaPal, order, paypalClientId, paypalDispatch]);
-
-  function onApprove(data: any, actions: any) {
-    return actions.order.capture().then(async function (details: any) {
-      try {
-        await payOrder({ id: orderId || "", data });
-        refetch();
-        toast.success("Order is paid");
-      } catch (error: any) {
-        toast.error(error?.data?.message || error.message);
-      }
-    });
   }
 
-  function createOrder(data, actions) {
+  function createOrder(data: CreateOrderData, actions: CreateOrderActions) {
     return actions.order
       .create({
-        purchase_units: [{ amount: { value: order.totalPrice } }],
+        intent: "CAPTURE",
+        purchase_units: [{
+          amount: {
+            value: order.totalPrice.toFixed(2),
+            currency_code: "USD"
+          }
+        }],
       })
       .then((orderID) => {
+        console.log("Order ID: ", orderID);
         return orderID;
       });
   }
 
-  function onError(err) {
+  function onError(err: any) {
     toast.error(err.message);
   }
 
   const deliverHandler = async () => {
-    await deliverOrder(orderId);
+    await deliverOrder(orderId || "");
     refetch();
   };
 
@@ -90,14 +76,14 @@ export default function Order() {
   ) : error ? (
     <Messsage variant="error">{error.message}</Messsage>
   ) : (
-    <div className="container flex flex-col ml-[10rem] md:flex-row">
-      <div className="md:w-2/3 pr-4">
-        <div className="border gray-300 mt-5 pb-4 mb-5">
+    <div className="container mx-auto flex flex-col p-4">
+      <div className="">
+        <div className="border gray-300 mt-5 mb-5">
           {order.orderItems.length === 0 ? (
             <Messsage>Order is empty</Messsage>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-[80%]">
+              <table className="w-full">
                 <thead className="border-b-2">
                   <tr>
                     <th className="p-2">Image</th>
@@ -120,7 +106,11 @@ export default function Order() {
                       </td>
 
                       <td className="p-2">
-                        <Link to={`/product/${item.productId}`}>{item.name}</Link>
+                        <Link to={`/product/${item.productId}`}
+                          className="link link-primary"
+                        >
+                          {item.name}
+                        </Link>
                       </td>
 
                       <td className="p-2 text-center">{item.quantity}</td>
@@ -137,7 +127,7 @@ export default function Order() {
         </div>
       </div>
 
-      <div className="md:w-1/3">
+      <div className="w-full md:w-1/3 mx-auto">
         <div className="mt-5 border-gray-300 pb-4 mb-4">
           <h2 className="text-xl font-bold mb-2">Shipping</h2>
           <p className="mb-4 mt-4">

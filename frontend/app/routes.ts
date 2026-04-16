@@ -9,8 +9,10 @@ export default [
   route("place-order", "routes/orders/place-order.tsx"),
   route("order/:id", "routes/orders/order.tsx"),
   route("favorites", "routes/favorites.tsx"),
-  route("profile", "routes/user/profile.tsx"),
-  route("user-orders", "routes/user/orders.tsx"),
+  route("profile", "routes/profile.tsx"),
+  layout("routes/user/layout.tsx", prefix("user", [
+    route("orders", "routes/user/orders.tsx"),
+  ])),
   route("login", "routes/auth/login.tsx"),
   route("register", "routes/auth/register.tsx"),
   layout("routes/admin/layout.tsx", prefix("admin", [

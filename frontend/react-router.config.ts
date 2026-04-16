@@ -11,7 +11,7 @@ export default {
     "/cart",
     "/favorites",
     "/profile",
-    "/user-orders",
+    "/user/orders",
     "/login",
     "/register",
     "/admin",

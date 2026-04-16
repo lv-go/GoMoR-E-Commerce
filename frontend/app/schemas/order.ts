@@ -37,8 +37,8 @@ export const orderSchema = z.object({
   paidAt: z.string().datetime().optional(),
   isDelivered: z.boolean().default(false),
   deliveredAt: z.string().datetime().optional(),
-  createdAt: z.string().datetime().optional(),
-  updatedAt: z.string().datetime().optional(),
+  createdAt: z.iso.datetime().optional(),
+  updatedAt: z.iso.datetime().optional(),
 });
 
 export type OrderItem = z.infer<typeof orderItemSchema>;

@@ -26,7 +26,9 @@ export async function fetchWithAuth<T>(
   }
   headers.set("Content-Type", "application/json");
 
-  const response = await fetch(`${BASE_URL}${endpoint}?${queryParams}`, {
+  const url = new URL(`${BASE_URL}${endpoint}`);
+  url.search = queryParams.toString();
+  const response = await fetch(url, {
     headers,
     ...options,
   });

@@ -8,7 +8,7 @@ export async function clientLoader() {
   if (!user) {
     return redirect("/login");
   }
-  if (user.role !== "admin") {
+  if (user.role !== "user") {
     return redirect("/");
   }
   return null;
@@ -17,7 +17,6 @@ export async function clientLoader() {
 export default function Layout() {
   return (
     <>
-      <AdminMenu />
       <Outlet />
     </>
   )
