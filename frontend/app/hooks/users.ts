@@ -6,7 +6,7 @@ import { type Page, type PageRequest } from "../schemas/api";
 export function useGetPage(params: PageRequest & { ids_in?: string[] }) {
   return useQuery<Page<User>>({
     queryKey: ["users", "page", JSON.stringify(params)],
-    queryFn: () => fetchWithAuth(`/users`, params),
+    queryFn: () => fetchWithAuth(`/users`, { params }),
   });
 }
 

@@ -10,7 +10,7 @@ export function useGetTopProducts() {
 export function useGetPage(params: PageRequest & ProductFilters) {
   return useQuery<Page<Product>>({
     queryKey: ["products", "page", JSON.stringify(params)],
-    queryFn: () => fetchWithAuth(`/products`, params),
+    queryFn: () => fetchWithAuth(`/products`, { params }),
   });
 }
 

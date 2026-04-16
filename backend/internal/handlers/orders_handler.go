@@ -65,3 +65,34 @@ func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.WriteJSON(w, http.StatusCreated, &order)
 }
+
+func (h *OrderHandler) FindPage(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("OrderHandler.FindPage", "path", r.URL.Path)
+	user := auth.GetUserFromContext(r)
+
+	filter := make(map[string]string)
+
+	// if user is customer, find only their orders
+	if user.Role != "admin" {
+		slog.Debug("OrderHandler.FindPage", "userId", user.ID)
+		filter["userId"] = user.ID
+	}
+
+	slog.Debug("OrderHandler.FindPage", "filter", filter)
+
+	sortBy := []repository.SortBy{{
+		Field:     "createdAt",
+		Direction: repository.SortDirection_Descending,
+	}}
+
+	orders, err := h.orderRepo.FindPage(r.Context(), filter, repository.ManyOpts{
+		SortBy: &sortBy,
+	})
+	if err != nil {
+		slog.Error("Error finding orders", "error", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, orders)
+}

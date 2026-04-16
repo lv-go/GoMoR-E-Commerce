@@ -6,7 +6,7 @@ import { type Page, type PageRequest } from "../schemas/api";
 export function useGetPage(params: PageRequest = {}) {
   return useQuery<Page<Category>>({
     queryKey: ["categories", "page", JSON.stringify(params)],
-    queryFn: () => fetchWithAuth(`/categories`, params),
+    queryFn: () => fetchWithAuth(`/categories`, { params }),
   });
 }
 

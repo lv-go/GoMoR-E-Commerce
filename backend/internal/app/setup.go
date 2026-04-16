@@ -65,7 +65,7 @@ func Setup(ctx context.Context) http.Handler {
 	apiMux.HandleFunc(http.MethodPut+" /orders/{id}", authMiddleware.IsAdmin(orderHandler.Update))
 	apiMux.HandleFunc(http.MethodDelete+" /orders/{id}", authMiddleware.IsAdmin(orderHandler.DeleteById))
 	apiMux.HandleFunc(http.MethodGet+" /orders/{id}", authMiddleware.IsAuthenticated(orderHandler.FindById))
-	apiMux.HandleFunc(http.MethodGet+" /orders", authMiddleware.IsAdmin(orderHandler.FindPage))
+	apiMux.HandleFunc(http.MethodGet+" /orders", authMiddleware.IsAuthenticated(orderHandler.FindPage))
 
 	// PayPal config
 	apiMux.HandleFunc("/config/paypal", func(w http.ResponseWriter, r *http.Request) {

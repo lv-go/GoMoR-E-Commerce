@@ -4,7 +4,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 export async function fetchWithAuth<T>(
   endpoint: string,
-  params: any = {},
+  { params = {}, ...options }: { params?: Record<string, any> } & RequestInit = {},
 ): Promise<T> {
   const user = auth.currentUser;
   const token = user ? await user.getIdToken() : null;
@@ -28,6 +28,7 @@ export async function fetchWithAuth<T>(
 
   const response = await fetch(`${BASE_URL}${endpoint}?${queryParams}`, {
     headers,
+    ...options,
   });
 
   if (!response.ok) {
