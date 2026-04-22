@@ -2,72 +2,29 @@ package handlers
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"gomor-e-commerce/internal/auth"
 	"gomor-e-commerce/internal/handlers"
 	"gomor-e-commerce/internal/models"
+	"gomor-e-commerce/internal/repositories"
 	"gomor-e-commerce/internal/repository"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type MockAuthClient struct {
-	mock.Mock
-}
-
-func (m *MockAuthClient) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
-	args := m.Called(ctx, idToken)
-	if args.Get(0) != nil {
-		return args.Get(0).(*auth.Token), args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
 func TestOrderHandler(t *testing.T) {
-	authClient := new(MockAuthClient)
-	authMiddleware := auth.NewAuthMiddleware(authClient)
-	adminToken := &auth.Token{
-		UID: "user123",
-		Claims: map[string]interface{}{
-			"email":          "testadmin@example.com",
-			"username":       "testadmin",
-			"role":           "admin",
-			"email_verified": true,
-		},
-	}
-	userToken := &auth.Token{
-		UID: "user123",
-		Claims: map[string]interface{}{
-			"email":          "testuser@example.com",
-			"username":       "testuser",
-			"role":           "user",
-			"email_verified": true,
-		},
-	}
-
-	authClient.On("VerifyIDToken", mock.Anything, "admin-token").Return(adminToken, nil).Maybe()
-	authClient.On("VerifyIDToken", mock.Anything, "user-token").Return(userToken, nil).Maybe()
-
 	// Create repository
-	repo := repository.NewMongoCRUDRepository[models.Order, primitive.ObjectID](DB, "orders")
+	repo := repositories.NewOrdersRepository(DB)
 	productRepo := repository.NewMongoCRUDRepository[models.Product, primitive.ObjectID](DB, "products")
 
 	// Create handler
 	mux := http.NewServeMux()
-	handler := handlers.NewOrderHandler(repo, productRepo)
-	mux.HandleFunc("POST /orders", authMiddleware.IsAuthenticated(handler.Create))
-	mux.HandleFunc("GET /orders/{id}", authMiddleware.IsAuthenticated(handler.FindById))
-	mux.HandleFunc("PUT /orders/{id}", authMiddleware.IsAdmin(handler.Update))
-	mux.HandleFunc("DELETE /orders/{id}", authMiddleware.IsAdmin(handler.DeleteById))
-	mux.HandleFunc("GET /orders", authMiddleware.IsAuthenticated(handler.FindPage))
+	handlers.SetupOrdersHandlers(mux, authMiddleware, repo, productRepo)
 
 	product, err := productRepo.FindOne(t.Context(), bson.D{
 		primitive.E{Key: "name", Value: "Test Product"},
@@ -186,6 +143,45 @@ func TestOrderHandler(t *testing.T) {
 			}
 		}
 		assert.True(t, found)
+	})
+
+	t.Run("GetTotal", func(t *testing.T) {
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/orders/total", nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		var total int64
+		err = json.NewDecoder(rr.Body).Decode(&total)
+		assert.NoError(t, err)
+		assert.GreaterOrEqual(t, total, int64(1))
+	})
+
+	t.Run("GetTotalSales", func(t *testing.T) {
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/orders/total-sales", nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		var totalSales float64
+		err = json.NewDecoder(rr.Body).Decode(&totalSales)
+		assert.NoError(t, err)
+		assert.GreaterOrEqual(t, totalSales, float64(1))
+	})
+
+	t.Run("GetTotalSalesByDate", func(t *testing.T) {
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/orders/total-sales-by-date", nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		var totalSalesByDate []models.OrderSalesTotal
+		err = json.NewDecoder(rr.Body).Decode(&totalSalesByDate)
+		assert.NoError(t, err)
+		assert.GreaterOrEqual(t, len(totalSalesByDate), 1)
 	})
 
 	t.Run("Delete", func(t *testing.T) {

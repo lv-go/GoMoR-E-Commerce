@@ -21,12 +21,7 @@ func TestUserHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handler := handlers.NewCRUDHandler(repo)
-	mux.HandleFunc("POST /users", handler.Create)
-	mux.HandleFunc("GET /users/{id}", handler.FindById)
-	mux.HandleFunc("PUT /users/{id}", handler.Update)
-	mux.HandleFunc("DELETE /users/{id}", handler.DeleteById)
-	mux.HandleFunc("GET /users", handler.FindPage)
+	handlers.SetupUsersHandlers(mux, authMiddleware, repo)
 
 	userId := "user-" + faker.RandomString(10)
 	user := &models.User{
@@ -41,7 +36,9 @@ func TestUserHandler(t *testing.T) {
 		rr := httptest.NewRecorder()
 		jsonBody, err := json.Marshal(user)
 		assert.NoError(t, err)
-		mux.ServeHTTP(rr, httptest.NewRequest("POST", "/users", bytes.NewBuffer(jsonBody)))
+		req := httptest.NewRequest("POST", "/users", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusCreated, rr.Code)
 
 		var createdUser models.User
@@ -62,7 +59,9 @@ func TestUserHandler(t *testing.T) {
 
 	t.Run("FindById", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/users/"+userId, nil))
+		req := httptest.NewRequest("GET", "/users/"+userId, nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var foundUser models.User
@@ -77,7 +76,9 @@ func TestUserHandler(t *testing.T) {
 		user.Name = "testuser_updated"
 		jsonBody, err := json.Marshal(user)
 		assert.NoError(t, err)
-		mux.ServeHTTP(rr, httptest.NewRequest("PUT", "/users/"+userId, bytes.NewBuffer(jsonBody)))
+		req := httptest.NewRequest("PUT", "/users/"+userId, bytes.NewBuffer(jsonBody))
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var updatedUser models.User
@@ -89,7 +90,9 @@ func TestUserHandler(t *testing.T) {
 
 	t.Run("FindPage", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/users?limit=10&offset=0", nil))
+		req := httptest.NewRequest("GET", "/users?limit=10&offset=0", nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var page repository.Page[models.User]
@@ -117,13 +120,17 @@ func TestUserHandler(t *testing.T) {
 
 	t.Run("Delete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("DELETE", "/users/"+userId, nil))
+		req := httptest.NewRequest("DELETE", "/users/"+userId, nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
 	t.Run("FindByIdAfterDelete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/users/"+userId, nil))
+		req := httptest.NewRequest("GET", "/users/"+userId, nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusNotFound, rr.Code)
 	})
 }

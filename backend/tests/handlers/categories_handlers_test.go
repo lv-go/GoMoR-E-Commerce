@@ -22,12 +22,7 @@ func TestCategoryHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handler := handlers.NewCRUDHandler(repo)
-	mux.HandleFunc("POST /categories", handler.Create)
-	mux.HandleFunc("GET /categories/{id}", handler.FindById)
-	mux.HandleFunc("PUT /categories/{id}", handler.Update)
-	mux.HandleFunc("DELETE /categories/{id}", handler.DeleteById)
-	mux.HandleFunc("GET /categories", handler.FindPage)
+	handlers.SetupCategoriesHandlers(mux, authMiddleware, repo)
 
 	category := &models.Category{
 		Name: "Electronics",
@@ -37,7 +32,9 @@ func TestCategoryHandler(t *testing.T) {
 		rr := httptest.NewRecorder()
 		jsonBody, err := json.Marshal(category)
 		assert.NoError(t, err)
-		mux.ServeHTTP(rr, httptest.NewRequest("POST", "/categories", bytes.NewBuffer(jsonBody)))
+		req := httptest.NewRequest("POST", "/categories", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusCreated, rr.Code)
 
 		var createdCategory models.Category
@@ -69,7 +66,9 @@ func TestCategoryHandler(t *testing.T) {
 		category.Name = "Electronics Updated"
 		jsonBody, err := json.Marshal(category)
 		assert.NoError(t, err)
-		mux.ServeHTTP(rr, httptest.NewRequest("PUT", "/categories/"+category.ID.Hex(), bytes.NewBuffer(jsonBody)))
+		req := httptest.NewRequest("PUT", "/categories/"+category.ID.Hex(), bytes.NewBuffer(jsonBody))
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var updatedCategory models.Category
@@ -81,7 +80,9 @@ func TestCategoryHandler(t *testing.T) {
 
 	t.Run("FindPage", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("GET", "/categories?limit=10&offset=0", nil))
+		req := httptest.NewRequest("GET", "/categories?limit=10&offset=0", nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var page repository.Page[models.Category]
@@ -108,7 +109,9 @@ func TestCategoryHandler(t *testing.T) {
 
 	t.Run("Delete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("DELETE", "/categories/"+category.ID.Hex(), nil))
+		req := httptest.NewRequest("DELETE", "/categories/"+category.ID.Hex(), nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 

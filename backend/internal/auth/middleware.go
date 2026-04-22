@@ -15,8 +15,8 @@ type AuthMiddleware struct {
 
 func NewAuthMiddleware(
 	authClient Client,
-) AuthMiddleware {
-	return AuthMiddleware{
+) *AuthMiddleware {
+	return &AuthMiddleware{
 		authClient: authClient,
 	}
 }

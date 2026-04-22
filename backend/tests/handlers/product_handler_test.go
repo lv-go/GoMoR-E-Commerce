@@ -21,12 +21,7 @@ func TestProductHandler(t *testing.T) {
 
 	// Create handler
 	mux := http.NewServeMux()
-	handler := handlers.NewCRUDHandler(repo)
-	mux.HandleFunc("POST /products", handler.Create)
-	mux.HandleFunc("GET /products/{id}", handler.FindById)
-	mux.HandleFunc("PUT /products/{id}", handler.Update)
-	mux.HandleFunc("DELETE /products/{id}", handler.DeleteById)
-	mux.HandleFunc("GET /products", handler.FindPage)
+	handlers.SetupProductsHandlers(mux, authMiddleware, repo)
 
 	product := &models.Product{
 		Name:         "Test Product",
@@ -40,7 +35,9 @@ func TestProductHandler(t *testing.T) {
 		rr := httptest.NewRecorder()
 		jsonBody, err := json.Marshal(product)
 		assert.NoError(t, err)
-		mux.ServeHTTP(rr, httptest.NewRequest("POST", "/products", bytes.NewBuffer(jsonBody)))
+		req := httptest.NewRequest("POST", "/products", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusCreated, rr.Code)
 
 		var createdProduct models.Product
@@ -75,7 +72,9 @@ func TestProductHandler(t *testing.T) {
 		product.Name = "Test Product Updated"
 		jsonBody, err := json.Marshal(product)
 		assert.NoError(t, err)
-		mux.ServeHTTP(rr, httptest.NewRequest("PUT", "/products/"+product.ID.Hex(), bytes.NewBuffer(jsonBody)))
+		req := httptest.NewRequest("PUT", "/products/"+product.ID.Hex(), bytes.NewBuffer(jsonBody))
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		var updatedProduct models.Product
@@ -116,7 +115,9 @@ func TestProductHandler(t *testing.T) {
 
 	t.Run("Delete", func(t *testing.T) {
 		rr := httptest.NewRecorder()
-		mux.ServeHTTP(rr, httptest.NewRequest("DELETE", "/products/"+product.ID.Hex(), nil))
+		req := httptest.NewRequest("DELETE", "/products/"+product.ID.Hex(), nil)
+		req.Header.Set("Authorization", "Bearer admin-token")
+		mux.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 

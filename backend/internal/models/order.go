@@ -46,3 +46,8 @@ type Order struct {
 	IsDelivered     bool                `json:"isDelivered" bson:"isDelivered"`
 	DeliveredAt     time.Time           `json:"deliveredAt" bson:"deliveredAt"`
 }
+
+type OrderSalesTotal struct {
+	ID    string  `bson:"_id"`
+	Total float64 `bson:"total"`
+}

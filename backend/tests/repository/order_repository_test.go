@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"gomor-e-commerce/internal/models"
-	"gomor-e-commerce/internal/repository"
+	"gomor-e-commerce/internal/repositories"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,7 +15,7 @@ func TestOrderRepository(t *testing.T) {
 	var err error
 
 	// Create repository
-	repo := repository.NewMongoCRUDRepository[models.Order, primitive.ObjectID](DB, "orders")
+	repo := repositories.NewOrdersRepository(DB)
 
 	// Test data
 	userID := primitive.NewObjectID().Hex()
@@ -63,9 +63,9 @@ func TestOrderRepository(t *testing.T) {
 	})
 
 	// Test Update
-	foundOrder.IsPaid = true
-	foundOrder.PaidAt = time.Now()
 	t.Run("Update", func(t *testing.T) {
+		foundOrder.IsPaid = true
+		foundOrder.PaidAt = time.Now()
 		err = repo.Update(t.Context(), foundOrder)
 		assert.NoError(t, err)
 	})
@@ -75,6 +75,32 @@ func TestOrderRepository(t *testing.T) {
 		foundOrder, err = repo.FindById(t.Context(), *order.ID)
 		assert.NoError(t, err)
 		assert.True(t, foundOrder.IsPaid)
+	})
+
+	// Test GetTotal Sales
+	t.Run("GetTotalSales", func(t *testing.T) {
+		totalSales, err := repo.GetTotalSales(t.Context())
+		assert.NoError(t, err)
+		assert.NotNil(t, totalSales)
+		assert.GreaterOrEqual(t, totalSales, 0.00)
+	})
+
+	// Test GetTotal Sales By Date
+	t.Run("GetTotalSalesByDate", func(t *testing.T) {
+		totalSales, err := repo.GetTotalSalesByDate(t.Context())
+		assert.NoError(t, err)
+		assert.NotNil(t, totalSales)
+		for _, sale := range totalSales {
+			assert.NotNil(t, sale.ID)
+			assert.GreaterOrEqual(t, sale.Total, 0.00)
+		}
+	})
+
+	// Test GetTotal
+	t.Run("GetTotal", func(t *testing.T) {
+		totalSales, err := repo.GetTotal(t.Context())
+		assert.NoError(t, err)
+		assert.GreaterOrEqual(t, totalSales, int64(1))
 	})
 
 	// Test Delete

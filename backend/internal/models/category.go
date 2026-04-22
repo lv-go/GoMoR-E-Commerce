@@ -1,9 +1,9 @@
 package models
 
 import (
-	"gomor-e-commerce/internal/repository"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	"gomor-e-commerce/internal/repository"
 )
 
 type Category struct {

@@ -6,6 +6,7 @@ import (
 	"gomor-e-commerce/internal/auth"
 	"gomor-e-commerce/internal/handlers"
 	"gomor-e-commerce/internal/models"
+	"gomor-e-commerce/internal/repositories"
 	"gomor-e-commerce/internal/repository"
 	"gomor-e-commerce/internal/utils"
 	"log/slog"
@@ -23,7 +24,7 @@ func Setup(ctx context.Context) http.Handler {
 	userRepo := repository.NewMongoCRUDRepository[models.User, string](db, "users")
 	productRepo := repository.NewMongoCRUDRepository[models.Product, primitive.ObjectID](db, "products")
 	categoryRepo := repository.NewMongoCRUDRepository[models.Category, primitive.ObjectID](db, "categories")
-	orderRepo := repository.NewMongoCRUDRepository[models.Order, primitive.ObjectID](db, "orders")
+	orderRepo := repositories.NewOrdersRepository(db)
 
 	// Create router
 	mux := http.NewServeMux()
@@ -38,36 +39,10 @@ func Setup(ctx context.Context) http.Handler {
 	mux.Handle(apiPath+"/", http.StripPrefix(apiPath, apiMux))
 
 	// Create handlers
-	userHandler := handlers.NewCRUDHandler(userRepo)
-	apiMux.HandleFunc(http.MethodPost+" /users", authMiddleware.IsAdmin(userHandler.Create))
-	apiMux.HandleFunc(http.MethodPut+" /users/{id}", authMiddleware.IsAdmin(userHandler.Update))
-	apiMux.HandleFunc(http.MethodDelete+" /users/{id}", authMiddleware.IsAdmin(userHandler.DeleteById))
-	apiMux.HandleFunc(http.MethodGet+" /users/{id}", authMiddleware.IsAdmin(userHandler.FindById))
-	apiMux.HandleFunc(http.MethodGet+" /users", authMiddleware.IsAdmin(userHandler.FindPage))
-
-	productHandler := handlers.NewProductHandler(productRepo)
-	apiMux.HandleFunc(http.MethodPost+" /products", authMiddleware.IsAdmin(productHandler.Create))
-	apiMux.HandleFunc(http.MethodPut+" /products/{id}", authMiddleware.IsAdmin(productHandler.Update))
-	apiMux.HandleFunc(http.MethodDelete+" /products/{id}", authMiddleware.IsAdmin(productHandler.DeleteById))
-	apiMux.HandleFunc(http.MethodGet+" /products/{id}", productHandler.FindById)
-	apiMux.HandleFunc(http.MethodGet+" /products", productHandler.FindPage)
-	apiMux.HandleFunc(http.MethodGet+" /products/brands", productHandler.GetBrands)
-
-	categoryHandler := handlers.NewCRUDHandler(categoryRepo)
-	apiMux.HandleFunc(http.MethodPost+" /categories", authMiddleware.IsAdmin(categoryHandler.Create))
-	apiMux.HandleFunc(http.MethodPut+" /categories/{id}", authMiddleware.IsAdmin(categoryHandler.Update))
-	apiMux.HandleFunc(http.MethodDelete+" /categories/{id}", authMiddleware.IsAdmin(categoryHandler.DeleteById))
-	apiMux.HandleFunc(http.MethodGet+" /categories/{id}", categoryHandler.FindById)
-	apiMux.HandleFunc(http.MethodGet+" /categories", categoryHandler.FindPage)
-
-	orderHandler := handlers.NewOrderHandler(orderRepo, productRepo)
-	apiMux.HandleFunc(http.MethodPost+" /orders", authMiddleware.IsAuthenticated(orderHandler.Create))
-	apiMux.HandleFunc(http.MethodPut+" /orders/{id}", authMiddleware.IsAdmin(orderHandler.Update))
-	apiMux.HandleFunc(http.MethodDelete+" /orders/{id}", authMiddleware.IsAdmin(orderHandler.DeleteById))
-	apiMux.HandleFunc(http.MethodGet+" /orders/{id}", authMiddleware.IsAuthenticated(orderHandler.FindById))
-	apiMux.HandleFunc(http.MethodGet+" /orders", authMiddleware.IsAuthenticated(orderHandler.FindPage))
-	apiMux.HandleFunc(http.MethodPut+" /orders/{id}/pay", authMiddleware.IsAuthenticated(orderHandler.Pay))
-	apiMux.HandleFunc(http.MethodPut+" /orders/{id}/deliver", authMiddleware.IsAdmin(orderHandler.Deliver))
+	handlers.SetupUsersHandlers(apiMux, authMiddleware, userRepo)
+	handlers.SetupProductsHandlers(apiMux, authMiddleware, productRepo)
+	handlers.SetupCategoriesHandlers(apiMux, authMiddleware, categoryRepo)
+	handlers.SetupOrdersHandlers(apiMux, authMiddleware, orderRepo, productRepo)
 
 	// PayPal config
 	apiMux.HandleFunc("/config/paypal", func(w http.ResponseWriter, r *http.Request) {

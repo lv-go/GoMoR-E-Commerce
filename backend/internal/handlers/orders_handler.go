@@ -4,31 +4,56 @@ import (
 	"errors"
 	"gomor-e-commerce/internal/auth"
 	"gomor-e-commerce/internal/models"
+	"gomor-e-commerce/internal/repositories"
 	"gomor-e-commerce/internal/repository"
 	"gomor-e-commerce/internal/utils"
 	"log/slog"
 	"net/http"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type OrderHandler struct {
+type ordersHandlers struct {
 	CRUDHandler[models.Order, primitive.ObjectID]
-	orderRepo   repository.CRUDRepository[models.Order, primitive.ObjectID]
+	orderRepo   repositories.OrdersRepository
 	productRepo repository.CRUDRepository[models.Product, primitive.ObjectID]
 }
 
-func NewOrderHandler(orderRepo repository.CRUDRepository[models.Order, primitive.ObjectID], productRepo repository.CRUDRepository[models.Product, primitive.ObjectID]) *OrderHandler {
-	return &OrderHandler{
+func SetupOrdersHandlers(
+	apiMux *http.ServeMux,
+	authMiddleware *auth.AuthMiddleware,
+	orderRepo repositories.OrdersRepository,
+	productRepo repository.CRUDRepository[models.Product, primitive.ObjectID],
+) {
+	h := &ordersHandlers{
 		CRUDHandler: *NewCRUDHandler(orderRepo),
 		orderRepo:   orderRepo,
 		productRepo: productRepo,
 	}
+
+	ordersUri := "/orders"
+
+	// Public routes
+	apiMux.HandleFunc(http.MethodPost+" "+ordersUri, authMiddleware.IsAuthenticated(h.Create))
+
+	// Authenticated routes
+	apiMux.HandleFunc(http.MethodPut+" "+ordersUri+"/{id}", authMiddleware.IsAuthenticated(h.Update))
+	apiMux.HandleFunc(http.MethodDelete+" "+ordersUri+"/{id}", authMiddleware.IsAuthenticated(h.DeleteById))
+	apiMux.HandleFunc(http.MethodGet+" "+ordersUri+"/{id}", authMiddleware.IsAuthenticated(h.FindById))
+	apiMux.HandleFunc(http.MethodGet+" "+ordersUri, authMiddleware.IsAuthenticated(h.FindPage))
+	apiMux.HandleFunc(http.MethodPut+" "+ordersUri+"/{id}/pay", authMiddleware.IsAuthenticated(h.Pay))
+	apiMux.HandleFunc(http.MethodPut+" "+ordersUri+"/{id}/deliver", authMiddleware.IsAuthenticated(h.Deliver))
+
+	// Admin routes
+	apiMux.HandleFunc(http.MethodGet+" "+ordersUri+"/total", authMiddleware.IsAdmin(h.GetTotal))
+	apiMux.HandleFunc(http.MethodGet+" "+ordersUri+"/total-sales", authMiddleware.IsAdmin(h.GetTotalSales))
+	apiMux.HandleFunc(http.MethodGet+" "+ordersUri+"/total-sales-by-date", authMiddleware.IsAdmin(h.GetTotalSalesByDate))
 }
 
-func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *ordersHandlers) Create(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("OrderHandler.Create", "path", r.URL.Path)
 	var order models.Order
 	err := utils.ReadJSON(w, r, &order)
@@ -67,7 +92,7 @@ func (h *OrderHandler) Create(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusCreated, &order)
 }
 
-func (h *OrderHandler) FindPage(w http.ResponseWriter, r *http.Request) {
+func (h *ordersHandlers) FindPage(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("OrderHandler.FindPage", "path", r.URL.Path)
 	user := auth.GetUserFromContext(r)
 
@@ -113,7 +138,7 @@ func (h *OrderHandler) FindPage(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, orders)
 }
 
-func (h *OrderHandler) Pay(w http.ResponseWriter, r *http.Request) {
+func (h *ordersHandlers) Pay(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("OrderHandler.Pay", "path", r.URL.Path)
 	orderIdStr := r.PathValue("id")
 	orderId, err := primitive.ObjectIDFromHex(orderIdStr)
@@ -153,7 +178,7 @@ func (h *OrderHandler) Pay(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, order)
 }
 
-func (h *OrderHandler) Deliver(w http.ResponseWriter, r *http.Request) {
+func (h *ordersHandlers) Deliver(w http.ResponseWriter, r *http.Request) {
 	slog.Debug("OrderHandler.Deliver", "path", r.URL.Path)
 	orderIdStr := r.PathValue("id")
 	orderId, err := primitive.ObjectIDFromHex(orderIdStr)
@@ -178,4 +203,43 @@ func (h *OrderHandler) Deliver(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.WriteJSON(w, http.StatusOK, order)
+}
+
+// GetTotal gets the total number of orders
+func (h *ordersHandlers) GetTotal(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("OrderHandler.GetTotal", "path", r.URL.Path)
+
+	total, err := h.orderRepo.GetTotal(r.Context())
+	if err != nil {
+		utils.InternalServerError(w, r, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, total)
+}
+
+// GetTotalSales gets the total sales
+func (h *ordersHandlers) GetTotalSales(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("OrderHandler.GetTotalSales", "path", r.URL.Path)
+
+	total, err := h.orderRepo.GetTotalSales(r.Context())
+	if err != nil {
+		utils.InternalServerError(w, r, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, total)
+}
+
+// GetTotalSalesByDate gets the total sales by date
+func (h *ordersHandlers) GetTotalSalesByDate(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("OrderHandler.GetTotalSalesByDate", "path", r.URL.Path)
+
+	totalSalesByDate, err := h.orderRepo.GetTotalSalesByDate(r.Context())
+	if err != nil {
+		utils.InternalServerError(w, r, err)
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, totalSalesByDate)
 }

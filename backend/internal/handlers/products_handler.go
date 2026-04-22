@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"gomor-e-commerce/internal/auth"
 	"gomor-e-commerce/internal/models"
 	"gomor-e-commerce/internal/repository"
 	"gomor-e-commerce/internal/utils"
@@ -12,20 +13,31 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ProductHandler struct {
+type productsHandlers struct {
 	CRUDHandler[models.Product, primitive.ObjectID]
 }
 
-func NewProductHandler(
+func SetupProductsHandlers(
+	apiMux *http.ServeMux,
+	authMiddleware *auth.AuthMiddleware,
 	repo repository.CRUDRepository[models.Product, primitive.ObjectID],
-) *ProductHandler {
-	return &ProductHandler{
+) {
+	handler := &productsHandlers{
 		CRUDHandler: *NewCRUDHandler(repo),
 	}
+
+	productsUri := "/products"
+
+	apiMux.HandleFunc(http.MethodPost+" "+productsUri, authMiddleware.IsAdmin(handler.Create))
+	apiMux.HandleFunc(http.MethodPut+" "+productsUri+"/{id}", authMiddleware.IsAdmin(handler.Update))
+	apiMux.HandleFunc(http.MethodDelete+" "+productsUri+"/{id}", authMiddleware.IsAdmin(handler.DeleteById))
+	apiMux.HandleFunc(http.MethodGet+" "+productsUri+"/{id}", handler.FindById)
+	apiMux.HandleFunc(http.MethodGet+" "+productsUri, handler.FindPage)
+	apiMux.HandleFunc(http.MethodGet+" "+productsUri+"/brands", handler.GetBrands)
 }
 
-func (h *ProductHandler) GetBrands(w http.ResponseWriter, r *http.Request) {
-	slog.Debug("ProductHandler.GetBrands", "path", r.URL.Path)
+func (h *productsHandlers) GetBrands(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("productsHandlers.GetBrands", "path", r.URL.Path)
 	brands, err := h.repo.Distinct(r.Context(), "brand", map[string]any{})
 	if err != nil {
 		utils.InternalServerError(w, r, err)
@@ -34,8 +46,8 @@ func (h *ProductHandler) GetBrands(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, brands)
 }
 
-func (h *ProductHandler) FindPage(w http.ResponseWriter, r *http.Request) {
-	slog.Debug("ProductHandler.FindPage", "path", r.URL.Path)
+func (h *productsHandlers) FindPage(w http.ResponseWriter, r *http.Request) {
+	slog.Debug("productsHandlers.FindPage", "path", r.URL.Path)
 	var err error
 	var offset int
 	var limit int
@@ -88,7 +100,7 @@ func (h *ProductHandler) FindPage(w http.ResponseWriter, r *http.Request) {
 	// 	filter["name"] = map[string]any{"$regex": search, "$options": "i"}
 	// }
 
-	slog.Debug("ProductHandler.FindPage", "filter", filter)
+	slog.Debug("productsHandlers.FindPage", "filter", filter)
 
 	result, err := h.repo.FindPage(r.Context(), filter, repository.ManyOpts{
 		Limit:  new(int64(limit)),
