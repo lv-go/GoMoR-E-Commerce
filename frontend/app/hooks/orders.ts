@@ -79,7 +79,7 @@ export function useGetTotalSalesQuery() {
 }
 
 export function useGetTotalSalesByDateQuery() {
-  return useQuery<{ _id: string; totalSales: number }[]>({
+  return useQuery<{ _id: string; total: number }[]>({
     queryKey: ["orders", "total-sales-by-date"],
     queryFn: () => fetchWithAuth("/orders/total-sales-by-date"),
   });

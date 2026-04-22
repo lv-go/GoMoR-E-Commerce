@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import Chart, { type Props } from "react-apexcharts";
 import { useGetTotalOrdersQuery, useGetTotalSalesByDateQuery, useGetTotalSalesQuery } from "~/hooks/orders";
-import { useGetPage } from "~/hooks/users";
-import AdminMenu from "../../components/Admin/AdminMenu";
+import { useGetPage as useGetUsersPage } from "~/hooks/users";
 import Loader from "../../components/Loader";
 import OrderList from "./orders";
+import { FaBriefcase, FaDollarSign, FaUsers } from "react-icons/fa";
+import { Link } from "react-router";
 
 export default function Dashboard() {
-  const { data: sales, isLoading } = useGetTotalSalesQuery();
-  const { data, isLoading: loading } = useGetPage();
-  const customers = data?.items || [];
-  const { data: orders, isLoading: loadingTwo } = useGetTotalOrdersQuery();
-  const { data: salesDetail } = useGetTotalSalesByDateQuery();
+  const { data: sales, isLoading: isLoadingSales } = useGetTotalSalesQuery();
+  const { data: usersPage, isLoading: isLoadingCustomers } = useGetUsersPage();
+  const customers = usersPage?.items || [];
+  const { data: orders, isLoading: isLoadingOrders } = useGetTotalOrdersQuery();
+  const { data: salesDetail, isLoading: isLoadingSalesDetail } = useGetTotalSalesByDateQuery();
 
   const [state, setState] = useState<Props>({
     options: {
@@ -65,7 +66,7 @@ export default function Dashboard() {
     if (salesDetail) {
       const formattedSalesDate = salesDetail.map((item) => ({
         x: item._id,
-        y: item.totalSales,
+        y: item.total,
       }));
 
       setState((prevState) => ({
@@ -86,40 +87,38 @@ export default function Dashboard() {
 
   return (
     <>
-      <AdminMenu />
-
       <section className="xl:ml-[4rem] md:ml-[0rem]">
-        <div className="w-[80%] flex justify-around flex-wrap">
-          <div className="rounded-lg bg-black p-5 w-[20rem] mt-5">
-            <div className="font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
-              $
+        <div className="container flex justify-around flex-wrap">
+          <Link to="/admin/orders" className="rounded-lg bg-base-300 p-5 w-[20rem] mt-5">
+            <div className="flex items-center justify-center font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
+              <FaDollarSign size={24} />
             </div>
 
             <p className="mt-5">Sales</p>
             <h1 className="text-xl font-bold">
-              $ {isLoading ? <Loader /> : sales?.toFixed(2)}
+              $ {isLoadingSales ? <Loader /> : sales?.toFixed(2)}
             </h1>
-          </div>
-          <div className="rounded-lg bg-black p-5 w-[20rem] mt-5">
+          </Link>
+          <Link to="/admin/users" className="rounded-lg bg-base-300 p-5 w-[20rem] mt-5">
             <div className="font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
-              $
+              <FaUsers size={24} />
             </div>
 
             <p className="mt-5">Customers</p>
             <h1 className="text-xl font-bold">
-              $ {isLoading ? <Loader /> : customers?.length}
+              {isLoadingCustomers ? <Loader /> : customers?.length}
             </h1>
-          </div>
-          <div className="rounded-lg bg-black p-5 w-[20rem] mt-5">
-            <div className="font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
-              $
+          </Link>
+          <Link to="/admin/orders" className="rounded-lg bg-base-300 p-5 w-[20rem] mt-5">
+            <div className="flex items-center justify-center font-bold rounded-full w-[3rem] bg-pink-500 text-center p-3">
+              <FaBriefcase size={24} />
             </div>
 
             <p className="mt-5">All Orders</p>
             <h1 className="text-xl font-bold">
-              $ {isLoading ? <Loader /> : orders}
+              {isLoadingOrders ? <Loader /> : orders}
             </h1>
-          </div>
+          </Link>
         </div>
 
         <div className="ml-[10rem] mt-[4rem]">

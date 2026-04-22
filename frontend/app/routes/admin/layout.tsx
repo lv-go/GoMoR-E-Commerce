@@ -1,7 +1,6 @@
 
 import { Outlet, redirect } from 'react-router';
 import { getCurrentUser } from '~/firebase-config';
-import AdminMenu from '../../components/Admin/AdminMenu';
 
 export async function clientLoader() {
   const user = await getCurrentUser();
@@ -17,7 +16,6 @@ export async function clientLoader() {
 export default function Layout() {
   return (
     <>
-      <AdminMenu />
       <Outlet />
     </>
   )

@@ -48,6 +48,6 @@ type Order struct {
 }
 
 type OrderSalesTotal struct {
-	ID    string  `bson:"_id"`
-	Total float64 `bson:"total"`
+	ID    string  `json:"_id" bson:"_id"`
+	Total float64 `json:"total" bson:"total"`
 }

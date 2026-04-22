@@ -8,7 +8,10 @@ import { useGetPage as useGetUsersPage } from "~/hooks/users";
 export default function OrderList() {
   const { data: ordersPage, isLoading, error } = useGetPage();
   const orders = ordersPage?.items ?? [];
-  const { data: usersPage } = useGetUsersPage({ ids_in: orders.map((order) => order.userId) });
+  const { data: usersPage } = useGetUsersPage({
+    ids_in: orders.map((order) => order.userId),
+    enabled: orders.length > 0
+  });
   const users = usersPage?.items ?? [];
   const userMap = new Map(users.map((user) => [user._id, user]));
 
@@ -22,7 +25,6 @@ export default function OrderList() {
         </Message>
       ) : (
         <>
-          <AdminMenu />
           <table className="container mx-auto">
 
             <thead className="w-full border">
