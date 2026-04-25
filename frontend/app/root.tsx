@@ -17,7 +17,7 @@ import { FirebaseAuthProvider } from "./FirebaseAuthContext";
 import { queryClient } from "./utils/query-client";
 
 
-const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || "test-client-id";
+const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

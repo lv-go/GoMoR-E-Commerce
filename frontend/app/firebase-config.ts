@@ -2,9 +2,9 @@ import { initializeApp } from "firebase/app";
 import { connectAuthEmulator, getAuth, type User } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY ?? 'test-api-key',
-  authDomain: import.meta.env.VITE_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_PUBLIC_FIREBASE_PROJECT_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
 }
 
 const app = initializeApp(firebaseConfig)

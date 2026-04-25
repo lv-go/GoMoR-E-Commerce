@@ -13,13 +13,13 @@ import (
 
 func ConnectDB(ctx context.Context) *mongo.Database {
 	slog.Info("Connecting to MongoDB...")
-	uri := os.Getenv("MONGO_URI")
+	uri := os.Getenv("MONGO_DB_URI")
 	if uri == "" {
 		uri = "localhost:27017"
 	}
 	slog.Info("MongoDB URI: ", "uri", uri)
-	password := os.Getenv("MONGO_PASSWORD")
-	username := os.Getenv("MONGO_USERNAME")
+	password := os.Getenv("MONGO_DB_PASSWORD")
+	username := os.Getenv("MONGO_DB_USERNAME")
 	if password == "" || username == "" {
 		username = "root"
 		password = "password"
@@ -30,7 +30,7 @@ func ConnectDB(ctx context.Context) *mongo.Database {
 		log.Fatal("Failed to connect to MongoDB:", err)
 		return nil
 	}
-	dbName := os.Getenv("MONGODB_DB_NAME")
+	dbName := os.Getenv("MONGO_DB_NAME")
 	if dbName == "" {
 		dbName = "gomor-e-commerce"
 	}
