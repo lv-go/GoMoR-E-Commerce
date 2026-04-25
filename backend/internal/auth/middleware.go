@@ -2,22 +2,27 @@ package auth
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"gomor-e-commerce/internal/models"
+	"gomor-e-commerce/internal/repository"
 	"gomor-e-commerce/internal/utils"
 )
 
 type AuthMiddleware struct {
 	authClient Client
+	userRepo   repository.CRUDRepository[models.User, string]
 }
 
 func NewAuthMiddleware(
 	authClient Client,
+	userRepo repository.CRUDRepository[models.User, string],
 ) *AuthMiddleware {
 	return &AuthMiddleware{
 		authClient: authClient,
+		userRepo:   userRepo,
 	}
 }
 
@@ -62,13 +67,22 @@ func (m *AuthMiddleware) IsAuthenticated(next http.HandlerFunc) http.HandlerFunc
 			return false
 		}
 
-		r = SetUserInContext(r, &models.User{
+		user := &models.User{
 			ID:       jwtToken.UID,
 			Email:    getStrClaim(jwtToken.Claims, "email"),
 			Name:     getStrClaim(jwtToken.Claims, "name"),
 			Role:     getStrClaim(jwtToken.Claims, "role"),
 			IsActive: getBoolClaim(jwtToken.Claims, "email_verified"),
-		})
+		}
+
+		slog.Info("Saving User to DB", "user", user)
+
+		if err = m.userRepo.Save(r.Context(), user); err != nil {
+			utils.InternalServerError(w, r, err)
+			return
+		}
+
+		r = SetUserInContext(r, user)
 		next(w, r)
 	}
 }

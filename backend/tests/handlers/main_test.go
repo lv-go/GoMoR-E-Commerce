@@ -10,6 +10,7 @@ import (
 
 	"gomor-e-commerce/internal/app"
 	"gomor-e-commerce/internal/auth"
+	"gomor-e-commerce/tests/mocks"
 
 	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,8 +28,12 @@ func TestMain(m *testing.M) {
 		log.Fatal("Failed to connect to database in TestMain")
 	}
 
-	authClient := new(MockAuthClient)
-	authMiddleware = auth.NewAuthMiddleware(authClient)
+	authClient := new(mocks.MockAuthClient)
+	mockUserRepo := new(mocks.MockUsersRepository)
+	// Mock Save to avoid panics when middleware tries to auto-create users from tokens
+	mockUserRepo.On("Save", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	authMiddleware = auth.NewAuthMiddleware(authClient, mockUserRepo)
 	adminToken := &auth.Token{
 		UID: "user123",
 		Claims: map[string]interface{}{
@@ -56,16 +61,4 @@ func TestMain(m *testing.M) {
 	cancel()                          // This will trigger the disconnect goroutine in ConnectDB
 	time.Sleep(10 * time.Millisecond) // Allow logs to print
 	os.Exit(code)
-}
-
-type MockAuthClient struct {
-	mock.Mock
-}
-
-func (m *MockAuthClient) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
-	args := m.Called(ctx, idToken)
-	if args.Get(0) != nil {
-		return args.Get(0).(*auth.Token), args.Error(1)
-	}
-	return nil, args.Error(1)
 }

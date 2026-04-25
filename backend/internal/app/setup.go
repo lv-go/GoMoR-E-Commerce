@@ -30,8 +30,8 @@ func Setup(ctx context.Context) http.Handler {
 	mux := http.NewServeMux()
 
 	// Add Auth middleware
-	authClient := auth.Setup(ctx)
-	authMiddleware := auth.NewAuthMiddleware(authClient)
+	authClient := auth.NewClient(ctx)
+	authMiddleware := auth.NewAuthMiddleware(authClient, userRepo)
 
 	// API base handler
 	apiPath := "/api"

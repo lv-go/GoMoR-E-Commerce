@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Chart, { type Props } from "react-apexcharts";
 import { useGetTotalOrdersQuery, useGetTotalSalesByDateQuery, useGetTotalSalesQuery } from "~/hooks/orders";
-import { useGetPage as useGetUsersPage } from "~/hooks/users";
+import { useGetTotalUsers, useGetPage as useGetUsersPage } from "~/hooks/users";
 import Loader from "../../components/Loader";
 import OrderList from "./orders";
 import { FaBriefcase, FaDollarSign, FaUsers } from "react-icons/fa";
@@ -9,8 +9,7 @@ import { Link } from "react-router";
 
 export default function Dashboard() {
   const { data: sales, isLoading: isLoadingSales } = useGetTotalSalesQuery();
-  const { data: usersPage, isLoading: isLoadingCustomers } = useGetUsersPage();
-  const customers = usersPage?.items || [];
+  const { data: customers, isLoading: isLoadingCustomers } = useGetTotalUsers();
   const { data: orders, isLoading: isLoadingOrders } = useGetTotalOrdersQuery();
   const { data: salesDetail, isLoading: isLoadingSalesDetail } = useGetTotalSalesByDateQuery();
 
@@ -106,7 +105,7 @@ export default function Dashboard() {
 
             <p className="mt-5">Customers</p>
             <h1 className="text-xl font-bold">
-              {isLoadingCustomers ? <Loader /> : customers?.length}
+              {isLoadingCustomers ? <Loader /> : customers || 0}
             </h1>
           </Link>
           <Link to="/admin/orders" className="rounded-lg bg-base-300 p-5 w-[20rem] mt-5">

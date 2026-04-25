@@ -1,0 +1,82 @@
+### Login with user1 credentials should return 200
+POST http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=gomor-e-commerce
+Content-Type: application/json
+
+{
+    "email": "user1@test.com",
+    "password": "S3cr3tP@ssw0rd",
+    "returnSecureToken": true
+}
+
+?? status == 200
+{{
+const body = JSON.parse(response.body)
+$global.idToken = body.idToken;
+$global.refreshToken = body.refreshToken;
+}}
+
+### Get all products with auth token should return 200
+GET http://localhost:8080/api/products
+Authorization: Bearer {{$global.idToken}}
+
+?? status == 200
+{{
+const assert = require("assert")
+
+const body = JSON.parse(response.body)
+
+assert.ok(body.total >= 0)
+assert.ok(body.page >= 0)
+assert.ok(body.size >= 0)
+assert.ok(body.totalPages >= 0)
+
+assert.ok(body.items?.length >= 0)
+
+}}
+
+### Get all orders without auth token should return 401
+GET http://localhost:8080/api/orders
+
+?? status == 401
+{{
+    const {deepEqual} = require("assert")
+    deepEqual(JSON.parse(response.body), {error: "unauthorized"})
+}}
+
+### Get all orders with auth token should return 200
+GET http://localhost:8080/api/orders
+Authorization: Bearer {{$global.idToken}}
+
+?? status == 200
+{{
+const assert = require("assert")
+
+const body = JSON.parse(response.body)
+
+assert.ok(body.total >= 0)
+assert.ok(body.page >= 0)
+assert.ok(body.size >= 0)
+assert.ok(body.totalPages >= 0)
+
+assert.ok(body.items?.length >= 0)
+
+}}
+
+### Get a single order with auth token should return 200
+GET http://localhost:8080/api/orders/1
+Authorization: Bearer {{$global.idToken}}
+
+?? status == 200
+{{
+const assert = require("assert")
+
+const body = JSON.parse(response.body)
+
+assert.ok(body.total >= 0)
+assert.ok(body.page >= 0)
+assert.ok(body.size >= 0)
+assert.ok(body.totalPages >= 0)
+
+assert.ok(body.items?.length >= 0)
+
+}}

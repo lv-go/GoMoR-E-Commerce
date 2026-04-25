@@ -47,29 +47,22 @@ func (c *client) VerifyIDToken(ctx context.Context, idToken string) (*Token, err
 	}, nil
 }
 
-func Setup(ctx context.Context) Client {
+func NewClient(ctx context.Context) Client {
 	emulatorHost := os.Getenv("FIREBASE_AUTH_EMULATOR_HOST")
+	var config *firebase.Config
 	if emulatorHost != "" {
 		slog.Info("Firebase Auth Emulator Detected: Connecting to:", "emulatorHost", emulatorHost)
 		// Use the project ID the emulator is configured with.
 		// This should match the 'aud' claim in the JWT token.
-		config := &firebase.Config{ProjectID: "gomor-e-commerce"}
-		app, err := firebase.NewApp(ctx, config)
-		if err != nil {
-			log.Fatalf("error initializing app for emulator: %v\n", err)
-		}
-
-		firebaseClient, err := app.Auth(ctx)
-		if err != nil {
-			log.Fatalf("error getting Auth client for emulator: %v\n", err)
-		}
-		return &client{
-			firebaseClient: firebaseClient,
+		config = &firebase.Config{ProjectID: "gomor-e-commerce"}
+	} else {
+		slog.Info("No Firebase Auth Emulator Detected: Connecting to Production")
+		config = &firebase.Config{
+			ProjectID: os.Getenv("FIREBASE_PROJECT_ID"),
 		}
 	}
 
-	slog.Info("No Firebase Auth Emulator Detected: Connecting to Production")
-	app, err := firebase.NewApp(ctx, nil)
+	app, err := firebase.NewApp(ctx, config)
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
 	}

@@ -5,6 +5,7 @@ import { type Page, type PageRequest } from "../schemas/api";
 
 export function useGetPage(params?: PageRequest & {
   ids_in?: string[];
+  is_user?: boolean;
   enabled?: boolean
 }) {
   const enabled = params?.enabled;
@@ -12,6 +13,13 @@ export function useGetPage(params?: PageRequest & {
     queryKey: ["users", "page", JSON.stringify(params)],
     queryFn: () => fetchWithAuth(`/users`, { params }),
     enabled,
+  });
+}
+
+export function useGetTotalUsers() {
+  return useQuery<number>({
+    queryKey: ["users", "count", "user"],
+    queryFn: () => fetchWithAuth(`/users/total`, { params: { role: "user" } }),
   });
 }
 

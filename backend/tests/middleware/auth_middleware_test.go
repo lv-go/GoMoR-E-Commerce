@@ -1,33 +1,24 @@
-package middleware_test
+package middleware
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"gomor-e-commerce/internal/auth"
+	"gomor-e-commerce/tests/mocks"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-type MockAuthClient struct {
-	mock.Mock
-}
-
-func (m *MockAuthClient) VerifyIDToken(ctx context.Context, idToken string) (*auth.Token, error) {
-	args := m.Called(ctx, idToken)
-	if args.Get(0) != nil {
-		return args.Get(0).(*auth.Token), args.Error(1)
-	}
-	return nil, args.Error(1)
-}
-
 func TestIsAuthenticatedMiddleware(t *testing.T) {
-	mockClient := new(MockAuthClient)
-	middleware := auth.NewAuthMiddleware(mockClient)
+	mockClient := new(mocks.MockAuthClient)
+	mockUserRepo := new(mocks.MockUsersRepository)
+	mockUserRepo.On("Save", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+	middleware := auth.NewAuthMiddleware(mockClient, mockUserRepo)
 
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := auth.GetUserFromContext(r)
